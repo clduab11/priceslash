@@ -1,0 +1,4 @@
+market_id,region_name,country_code,latitude,longitude,market_size_tier,timezone,currency_code,population_estimate
+MKT-NORTHEAST,Northeast,US,40.7128,-74.006,tier_1,America/New_York,USD,55000000
+MKT-MIDWEST,Midwest,US,41.8781,-87.6298,tier_2,America/Chicago,USD,68000000
+MKT-WEST,West Coast,US,34.0522,-118.2437,tier_1,America/Los_Angeles,USD,53000000

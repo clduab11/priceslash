@@ -1,0 +1,19 @@
+# PricePoint Intel - Python Dependencies
+
+# Database
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0  # PostgreSQL driver (optional for production)
+
+# Data Processing
+openpyxl>=3.1.0  # Excel file support
+
+# HTTP Client (for API connector)
+requests>=2.31.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Utilities (included in Python 3.9+)
+# dataclasses
+# typing

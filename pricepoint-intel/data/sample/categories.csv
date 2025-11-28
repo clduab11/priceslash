@@ -1,0 +1,11 @@
+id,name,parent,level
+CAT-ELEC,Electronics,,1
+CAT-ELEC-AUDIO,Audio Equipment,CAT-ELEC,2
+CAT-ELEC-COMP,Computer Accessories,CAT-ELEC,2
+CAT-ELEC-MOBILE,Mobile Accessories,CAT-ELEC,2
+CAT-HOME,Home & Kitchen,,1
+CAT-HOME-COOK,Cookware,CAT-HOME,2
+CAT-HOME-STORAGE,Storage & Organization,CAT-HOME,2
+CAT-HEALTH,Health & Personal Care,,1
+CAT-HEALTH-VIT,Vitamins & Supplements,CAT-HEALTH,2
+CAT-OFFICE,Office Supplies,,1

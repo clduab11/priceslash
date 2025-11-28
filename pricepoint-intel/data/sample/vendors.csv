@@ -1,0 +1,6 @@
+vendor_id,vendor_name,vendor_code,contact_email,contact_phone,headquarters_address,headquarters_latitude,headquarters_longitude,payment_terms_days,reliability_score
+V-001,TechSupply Co,TSC001,orders@techsupply.com,+1-555-0101,"123 Tech Blvd, San Francisco, CA 94105",37.7749,-122.4194,30,92
+V-002,Global Electronics Dist,GED002,sales@globalelec.com,+1-555-0102,"456 Commerce Way, Los Angeles, CA 90015",34.0522,-118.2437,45,88
+V-003,Midwest Wholesale Hub,MWH003,info@midwestwholesale.com,+1-555-0103,"789 Industrial Park, Chicago, IL 60601",41.8781,-87.6298,30,95
+V-004,Eastern Trade Partners,ETP004,orders@easterntrading.com,+1-555-0104,"321 Harbor Street, New York, NY 10001",40.7128,-74.006,60,85
+V-005,Southern Supply Chain,SSC005,sales@southernsupply.com,+1-555-0105,"555 Distribution Way, Atlanta, GA 30301",33.749,-84.388,30,90
