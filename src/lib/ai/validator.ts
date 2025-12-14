@@ -191,6 +191,47 @@ function fallbackValidation(anomaly: PricingAnomaly): ValidationResult {
  * Complete validation pipeline for an anomaly
  */
 export async function validateAndProcess(anomaly: PricingAnomaly): Promise<ValidatedGlitch | null> {
+  // Idempotency: if this anomaly was already processed, return the existing result
+  try {
+    const { db } = await import('@/db');
+    const existing = await db.validatedGlitch.findUnique({
+      where: { anomalyId: anomaly.id },
+      include: { product: true },
+    });
+
+    if (existing) {
+      return {
+        id: existing.id,
+        anomalyId: existing.anomalyId,
+        productId: existing.productId,
+        product: {
+          id: existing.product.id,
+          title: existing.product.title,
+          price: Number(existing.product.price),
+          originalPrice: existing.product.originalPrice ? Number(existing.product.originalPrice) : undefined,
+          stockStatus: existing.product.stockStatus as ValidatedGlitch['product']['stockStatus'],
+          retailer: existing.product.retailer,
+          url: existing.product.url,
+          imageUrl: existing.product.imageUrl ?? undefined,
+          category: existing.product.category ?? undefined,
+          retailerSku: existing.product.retailerSku ?? undefined,
+          scrapedAt: existing.product.scrapedAt,
+          description: existing.product.description ?? undefined,
+        },
+        isGlitch: existing.isGlitch,
+        confidence: existing.confidence,
+        reasoning: existing.reasoning,
+        glitchType: existing.glitchType as ValidationResult['glitch_type'],
+        profitMargin: Number(existing.profitMargin),
+        estimatedDuration: existing.estimatedDuration ?? undefined,
+        validatedAt: existing.validatedAt.toISOString(),
+      };
+    }
+  } catch (error) {
+    // If DB lookup fails, continue with best-effort processing.
+    console.warn('Validated glitch lookup failed; continuing:', error);
+  }
+
   // Run AI validation
   const validation = await validateAnomaly(anomaly);
 

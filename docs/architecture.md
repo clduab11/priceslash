@@ -25,18 +25,18 @@ The Pricing Error Alert Service is an event-driven system designed to detect pri
          └────────────────────┴────────────────────┴────────────────────┘
                                         │
                          ┌──────────────▼──────────────┐
-                         │     Supabase (PostgreSQL)    │
+                         │   PostgreSQL (via Prisma)    │
                          │                              │
                          │  • Products                  │
                          │  • Price History             │
-                         │  • Subscribers               │
+                         │  • Users/Subscriptions       │
                          │  • Notifications             │
                          └─────────────────────────────┘
 ```
 
 ## Component Details
 
-### 1. Firecrawl Scraper (`lib/scraping/firecrawl.ts`)
+### 1. Firecrawl Scraper (`src/lib/scraping/firecrawl.ts`)
 
 The scraper uses Firecrawl API in `stealth` mode to extract structured product data from e-commerce sites.
 
@@ -66,7 +66,7 @@ Acts as the message broker for the event-driven pipeline.
 - `price:anomaly:confirmed` - AI-validated glitches
 - `notification:pending` - Queued notifications
 
-### 3. DeepSeek Validator (`lib/ai/validator.ts`)
+### 3. DeepSeek Validator (`src/lib/ai/validator.ts`)
 
 AI-powered validation using OpenRouter API with DeepSeek V3 model.
 
@@ -85,7 +85,7 @@ Analyze if this price is a glitch or legitimate sale. Consider:
 - Product category norms
 ```
 
-### 4. Notification Manager (`lib/notifications/manager.ts`)
+### 4. Notification Manager (`src/lib/notifications/manager.ts`)
 
 Factory pattern implementation for multi-channel notifications.
 
@@ -112,8 +112,8 @@ Confirmed Glitch → Notification Factory → Channel Providers → Delivery
 | Component | Technology |
 |-----------|------------|
 | Framework | Next.js 14 (App Router, TypeScript) |
-| Database | Supabase (PostgreSQL) |
-| Auth | Supabase Auth |
+| Database | PostgreSQL (Prisma) |
+| Auth | Clerk |
 | Queue/Cache | Upstash Redis |
 | Scraping | Firecrawl API |
 | AI Analysis | OpenRouter (DeepSeek V3) |

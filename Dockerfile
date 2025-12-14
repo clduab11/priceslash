@@ -10,6 +10,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json ./
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 RUN npm ci
 
 # ============================================================================

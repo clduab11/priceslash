@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/health
  * Health check endpoint for monitoring and load balancers

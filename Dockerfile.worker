@@ -1,0 +1,19 @@
+# Worker image (Playwright-capable)
+# - Avoids building the Next.js app
+# - Includes OS dependencies + browsers needed for Playwright
+
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN npm ci
+
+COPY . .
+
+# Prisma client is required for DB access from workers
+RUN npx prisma generate
+
+# Default: scraping orchestrator (override per-service in docker-compose)
+CMD ["npm", "run", "worker"]

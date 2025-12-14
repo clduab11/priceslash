@@ -1,5 +1,6 @@
-import { Product, DetectResult, ScrapeResult } from '@/types';
+import { PricingAnomaly, Product, ScrapeResult } from '@/types';
 import { isRecentlyProcessed, publishAnomaly } from '@/lib/clients/redis';
+import { detectAnomaly } from '@/lib/analysis/detection';
 
 // Firecrawl API configuration
 const FIRECRAWL_API_URL = 'https://api.firecrawl.dev/v1';
@@ -108,75 +109,6 @@ export function extractRetailerId(url: string): string {
 }
 
 /**
- * Calculate Z-score for anomaly detection
- * Z-score = (current_price - mean) / standard_deviation
- */
-export function calculateZScore(currentPrice: number, historicalPrices: number[]): number {
-  if (historicalPrices.length < 2) return 0;
-
-  const mean = historicalPrices.reduce((a, b) => a + b, 0) / historicalPrices.length;
-  const squaredDiffs = historicalPrices.map(price => Math.pow(price - mean, 2));
-  const variance = squaredDiffs.reduce((a, b) => a + b, 0) / historicalPrices.length;
-  const stdDev = Math.sqrt(variance);
-
-  if (stdDev === 0) return 0;
-  
-  // Negative Z-score means price is below average (what we want for glitches)
-  return (mean - currentPrice) / stdDev;
-}
-
-/**
- * Detect pricing anomalies using Z-score and percentage drop
- * Triggers: Price Drop > 50% OR Z-score > 3
- */
-export function detectAnomaly(
-  currentPrice: number,
-  originalPrice: number | null,
-  historicalPrices: number[] = []
-): DetectResult {
-  // Calculate discount percentage if original price available
-  let discountPercentage = 0;
-  if (originalPrice && originalPrice > 0) {
-    discountPercentage = ((originalPrice - currentPrice) / originalPrice) * 100;
-  }
-
-  // Calculate Z-score from historical data
-  const zScore = calculateZScore(currentPrice, historicalPrices);
-
-  // Anomaly detection logic
-  const isPercentageDrop = discountPercentage > 50;
-  const isZScoreAnomaly = zScore > 3;
-  const isDecimalError = originalPrice !== null && (currentPrice / originalPrice < 0.01);
-
-  const isAnomaly = isPercentageDrop || isZScoreAnomaly || isDecimalError;
-
-  // Determine anomaly type
-  let anomalyType: DetectResult['anomaly_type'];
-  if (isDecimalError) {
-    anomalyType = 'decimal_error';
-  } else if (isZScoreAnomaly) {
-    anomalyType = 'z_score';
-  } else if (isPercentageDrop) {
-    anomalyType = 'percentage_drop';
-  }
-
-  // Calculate confidence based on signals
-  let confidence = 0;
-  if (isDecimalError) confidence = 95;
-  else if (isZScoreAnomaly && isPercentageDrop) confidence = 90;
-  else if (isZScoreAnomaly) confidence = 70 + Math.min(zScore * 5, 20);
-  else if (isPercentageDrop) confidence = 50 + Math.min(discountPercentage / 2, 30);
-
-  return {
-    is_anomaly: isAnomaly,
-    anomaly_type: anomalyType,
-    z_score: zScore,
-    discount_percentage: discountPercentage,
-    confidence: Math.min(confidence, 100),
-  };
-}
-
-/**
  * Fetch historical prices for a product from Prisma
  */
 export async function getHistoricalPrices(productUrl: string, days = 30): Promise<number[]> {
@@ -240,19 +172,60 @@ export async function scrapeAndDetect(url: string): Promise<ScrapeResult> {
     return { success: false, error: 'Could not extract product price' };
   }
 
-  const productId = `prod_${crypto.randomUUID()}`;
+  const scrapedAt = new Date();
   const product: Product = {
-    id: productId,
     title: extraction.product_name || scrapeResult.data.metadata?.title || 'Unknown Product',
     price: extraction.current_price,
     originalPrice: extraction.original_price || undefined,
     stockStatus: (extraction.stock_status as Product['stockStatus']) || 'unknown',
     retailer: extractRetailerId(url),
-    scrapedAt: new Date().toISOString(),
+    scrapedAt: scrapedAt.toISOString(),
     url,
     imageUrl: extraction.image_url || scrapeResult.data.metadata?.ogImage,
     category: extraction.category,
   };
+
+  // Persist product + price history (best-effort; pipeline is fully functional when DB is configured)
+  try {
+    const { db } = await import('@/db');
+
+    const dbProduct = await db.product.upsert({
+      where: { url },
+      create: {
+        title: product.title,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        stockStatus: product.stockStatus ?? 'unknown',
+        retailer: product.retailer,
+        url,
+        imageUrl: product.imageUrl,
+        category: product.category,
+        scrapedAt,
+      },
+      update: {
+        title: product.title,
+        price: product.price,
+        originalPrice: product.originalPrice,
+        stockStatus: product.stockStatus ?? 'unknown',
+        imageUrl: product.imageUrl,
+        category: product.category,
+        scrapedAt,
+      },
+    });
+
+    product.id = dbProduct.id;
+
+    await db.priceHistory.create({
+      data: {
+        productId: dbProduct.id,
+        productUrl: url,
+        price: dbProduct.price,
+        scrapedAt,
+      },
+    });
+  } catch (error) {
+    console.error('Error persisting product/price history:', error);
+  }
 
   // Get historical prices for Z-score calculation
   const historicalPrices = await getHistoricalPrices(url);
@@ -268,22 +241,47 @@ export async function scrapeAndDetect(url: string): Promise<ScrapeResult> {
     return { success: true, product };
   }
 
-  // Create anomaly record
-  const anomalyId = `anomaly_${crypto.randomUUID()}`;
-  const anomaly = {
-    id: anomalyId,
-    product_id: product.id,
-    product,
-    anomaly_type: detection.anomaly_type!,
-    z_score: detection.z_score,
-    discount_percentage: detection.discount_percentage || 0,
-    initial_confidence: detection.confidence,
-    detected_at: new Date().toISOString(),
-    status: 'pending' as const,
-  };
+  if (!product.id) {
+    return {
+      success: true,
+      product,
+      error: 'Anomaly detected but could not be persisted (database not configured)',
+    };
+  }
 
-  // Publish to Redis stream for further processing
-  await publishAnomaly(anomalyId, anomaly);
+  // Persist anomaly and publish to stream for async validation
+  let anomaly: PricingAnomaly | undefined;
+  try {
+    const { db } = await import('@/db');
+
+    const dbAnomaly = await db.pricingAnomaly.create({
+      data: {
+        productId: product.id,
+        anomalyType: detection.anomaly_type!,
+        zScore: detection.z_score || null,
+        discountPercentage: detection.discount_percentage || 0,
+        initialConfidence: detection.confidence,
+        status: 'pending',
+        detectedAt: scrapedAt,
+      },
+    });
+
+    anomaly = {
+      id: dbAnomaly.id,
+      productId: product.id,
+      product,
+      anomalyType: dbAnomaly.anomalyType as PricingAnomaly['anomalyType'],
+      zScore: dbAnomaly.zScore ? Number(dbAnomaly.zScore) : undefined,
+      discountPercentage: Number(dbAnomaly.discountPercentage),
+      initialConfidence: dbAnomaly.initialConfidence,
+      detectedAt: dbAnomaly.detectedAt.toISOString(),
+      status: dbAnomaly.status as PricingAnomaly['status'],
+    };
+
+    await publishAnomaly(dbAnomaly.id, anomaly as unknown as Record<string, unknown>);
+  } catch (error) {
+    console.error('Error persisting/publishing anomaly:', error);
+  }
 
   return { success: true, product, anomaly };
 }

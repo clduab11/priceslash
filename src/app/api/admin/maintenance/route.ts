@@ -8,6 +8,8 @@ import {
   cleanupApiUsage,
 } from '@/db/utils';
 
+export const dynamic = 'force-dynamic';
+
 // Admin secret for maintenance endpoints
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 

@@ -5,9 +5,14 @@
  * Connection is established via @prisma/adapter-pg.
  */
 
-import { PrismaClient } from '@prisma/client';
+import prismaClientPkg from '@prisma/client';
+import type { PrismaClient as PrismaClientType } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+
+const { PrismaClient } = prismaClientPkg as unknown as {
+  PrismaClient: new (options: unknown) => PrismaClientType;
+};
 
 // Database connection string
 const DATABASE_URL = process.env.DATABASE_URL || 
@@ -27,13 +32,13 @@ const adapter = new PrismaPg(pool);
 // Global type for development singleton
 declare global {
   // eslint-disable-next-line no-var
-  var prisma: PrismaClient | undefined;
+  var prisma: PrismaClientType | undefined;
 }
 
 /**
  * Create Prisma client with adapter
  */
-function createPrismaClient(): PrismaClient {
+function createPrismaClient(): PrismaClientType {
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' 
@@ -46,7 +51,7 @@ function createPrismaClient(): PrismaClient {
  * Get Prisma client singleton
  * Uses global singleton in development to prevent hot reload issues
  */
-function getPrismaClient(): PrismaClient {
+function getPrismaClient(): PrismaClientType {
   if (process.env.NODE_ENV === 'production') {
     return createPrismaClient();
   }
@@ -65,4 +70,4 @@ export const db = getPrismaClient();
 export { pool };
 
 // Re-export types
-export type { PrismaClient };
+export type { PrismaClientType as PrismaClient };

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { createCheckoutSession, SUBSCRIPTION_TIERS, SubscriptionTier } from '@/lib/subscription';
 import { db } from '@/db';
 
@@ -29,35 +29,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get or create user in our database
-    let user = await db.user.findUnique({ where: { clerkId } });
-    
-    if (!user) {
-      // Fetch user details from Clerk
-      const clerkResponse = await fetch(`https://api.clerk.com/v1/users/${clerkId}`, {
-        headers: {
-          Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
-        },
-      });
-
-      if (!clerkResponse.ok) {
-        return NextResponse.json({ error: 'Failed to fetch user data' }, { status: 500 });
-      }
-
-      const clerkUser = await clerkResponse.json();
-      const email = clerkUser.email_addresses?.[0]?.email_address;
-
-      if (!email) {
-        return NextResponse.json({ error: 'User email not found' }, { status: 400 });
-      }
-
-      user = await db.user.create({
-        data: {
-          clerkId,
-          email,
-        },
-      });
+    // Upsert user record from the current Clerk session (no extra network call)
+    const clerkUser = await currentUser();
+    const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
+    if (!email) {
+      return NextResponse.json({ error: 'User email not found' }, { status: 400 });
     }
+
+    const user = await db.user.upsert({
+      where: { clerkId },
+      create: { clerkId, email },
+      update: { email },
+    });
 
     // Create checkout session
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';

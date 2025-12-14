@@ -7,6 +7,8 @@ import {
   checkDatabaseHealth 
 } from '@/db/utils';
 
+export const dynamic = 'force-dynamic';
+
 // Secret key to protect cron endpoints (set in environment)
 const CRON_SECRET = process.env.CRON_SECRET;
 

@@ -5,7 +5,9 @@ import { ProxyManager } from './proxy-manager.js';
 import { RateLimiter } from './rate-limiter.js';
 import { db } from '../db/index.js';
 import { ScraperConfig } from './types.js';
-import { ProductData } from '../types/index.js';
+import { PricingAnomaly, Product, ProductData } from '../types/index.js';
+import { detectAnomaly } from '../lib/analysis/detection.js';
+import { publishAnomaly } from '../lib/clients/redis.js';
 
 interface RequestJobData {
   retailer: string;
@@ -130,7 +132,7 @@ export class ScrapingOrchestrator {
     category: string
   ): Promise<void> {
     for (const product of products) {
-      await db.product.upsert({
+      const dbProduct = await db.product.upsert({
         where: {
           url: product.url,
         },
@@ -150,7 +152,112 @@ export class ScrapingOrchestrator {
           scrapedAt: new Date(product.scrapedAt),
         },
       });
+
+      // Append to price history for anomaly detection
+      try {
+        await db.priceHistory.create({
+          data: {
+            productId: dbProduct.id,
+            productUrl: dbProduct.url,
+            price: dbProduct.price,
+            scrapedAt: dbProduct.scrapedAt,
+          },
+        });
+
+        // Detect anomalies and publish to stream for async validation
+        await this.detectAndPublishAnomaly(dbProduct, retailer, category);
+      } catch (error) {
+        console.error('Failed to record price history / detect anomaly:', error);
+      }
     }
+  }
+
+  private async detectAndPublishAnomaly(
+    dbProduct: {
+      id: string;
+      title: string;
+      price: unknown;
+      originalPrice: unknown | null;
+      stockStatus: string;
+      retailer: string;
+      url: string;
+      imageUrl: string | null;
+      category: string | null;
+      retailerSku: string | null;
+      scrapedAt: Date;
+      description: string | null;
+    },
+    retailer: string,
+    category: string
+  ): Promise<void> {
+    const history = await db.priceHistory.findMany({
+      where: { productUrl: dbProduct.url },
+      select: { price: true },
+      orderBy: { scrapedAt: 'desc' },
+      take: 30,
+    });
+
+    const historicalPrices = history.map((h: { price: unknown }) => Number(h.price)).filter((p: number) => Number.isFinite(p));
+
+    const currentPrice = Number(dbProduct.price);
+    const originalPrice = dbProduct.originalPrice ? Number(dbProduct.originalPrice) : null;
+
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) return;
+
+    const detection = detectAnomaly(currentPrice, originalPrice, historicalPrices);
+    if (!detection.is_anomaly || !detection.anomaly_type) return;
+
+    // Lightweight dedupe: skip if we already have a pending anomaly recently
+    const recentPending = await db.pricingAnomaly.findFirst({
+      where: {
+        productId: dbProduct.id,
+        status: 'pending',
+        detectedAt: { gte: new Date(Date.now() - 10 * 60 * 1000) }, // 10 minutes
+      },
+      orderBy: { detectedAt: 'desc' },
+    });
+    if (recentPending) return;
+
+    const created = await db.pricingAnomaly.create({
+      data: {
+        productId: dbProduct.id,
+        anomalyType: detection.anomaly_type,
+        zScore: detection.z_score || null,
+        discountPercentage: detection.discount_percentage || 0,
+        initialConfidence: detection.confidence,
+        status: 'pending',
+        detectedAt: dbProduct.scrapedAt,
+      },
+    });
+
+    const product: Product = {
+      id: dbProduct.id,
+      title: dbProduct.title,
+      price: currentPrice,
+      originalPrice: originalPrice || undefined,
+      stockStatus: (dbProduct.stockStatus as Product['stockStatus']) || 'unknown',
+      retailer,
+      url: dbProduct.url,
+      imageUrl: dbProduct.imageUrl || undefined,
+      category,
+      retailerSku: dbProduct.retailerSku || undefined,
+      scrapedAt: dbProduct.scrapedAt,
+      description: dbProduct.description || undefined,
+    };
+
+    const anomaly: PricingAnomaly = {
+      id: created.id,
+      productId: dbProduct.id,
+      product,
+      anomalyType: detection.anomaly_type,
+      zScore: detection.z_score,
+      discountPercentage: detection.discount_percentage,
+      initialConfidence: detection.confidence,
+      detectedAt: created.detectedAt.toISOString(),
+      status: 'pending',
+    };
+
+    await publishAnomaly(created.id, anomaly as unknown as Record<string, unknown>);
   }
 
   private loadRetailerConfigs(): ScraperConfig[] {

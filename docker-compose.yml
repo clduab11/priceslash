@@ -1,3 +1,12 @@
+## Build configurations
+x-app-build: &app-build
+  context: .
+  dockerfile: Dockerfile
+
+x-worker-build: &worker-build
+  context: .
+  dockerfile: Dockerfile.worker
+
 services:
   # PostgreSQL Database
   postgres:
@@ -34,9 +43,8 @@ services:
 
   # Next.js Application
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: *app-build
+    image: pricing-glitch-monetization-app
     ports:
       - "3000:3000"
     environment:
@@ -61,9 +69,8 @@ services:
 
   # Background Worker for scraping jobs
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: *worker-build
+    image: pricing-glitch-monetization-worker
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-pricing_glitch}
       - REDIS_URL=redis://redis:6379
@@ -78,6 +85,46 @@ services:
       redis:
         condition: service_healthy
     command: npm run worker
+    restart: unless-stopped
+
+  # Stream worker: validates anomalies (AI) and writes validated glitches
+  validator:
+    build: *worker-build
+    image: pricing-glitch-monetization-worker
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-pricing_glitch}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NODE_ENV=production
+    env_file:
+      - .env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run worker:validate
+    restart: unless-stopped
+
+  # Stream worker: sends notifications for confirmed glitches
+  notifier:
+    build: *worker-build
+    image: pricing-glitch-monetization-worker
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-pricing_glitch}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - NODE_ENV=production
+    env_file:
+      - .env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run worker:notify
     restart: unless-stopped
 
 volumes:

@@ -5,9 +5,14 @@
  * Run with: npx tsx prisma/seed.ts
  */
 
-import { PrismaClient } from '@prisma/client';
+import prismaClientPkg from '@prisma/client';
+import type { PrismaClient as PrismaClientType } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+
+const { PrismaClient } = prismaClientPkg as unknown as {
+  PrismaClient: new (options: unknown) => PrismaClientType;
+};
 
 // Database connection
 const DATABASE_URL = process.env.DATABASE_URL || 
