@@ -190,13 +190,13 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Lint Dockerfile (app)
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: Dockerfile
           failure-threshold: warning
 
       - name: Lint Dockerfile (worker)
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: Dockerfile.worker
           failure-threshold: warning
