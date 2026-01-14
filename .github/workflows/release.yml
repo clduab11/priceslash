@@ -16,7 +16,7 @@ permissions:
   packages: write
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '25'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
