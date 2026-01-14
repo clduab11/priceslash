@@ -33,7 +33,7 @@
     "react": "^18",
     "react-dom": "^18",
     "redis": "^5.10.0",
-    "resend": "^3.0.0",
+    "resend": "^6.7.0",
     "stripe": "^20.1.2",
     "tailwind-merge": "^2.0.0",
     "tsx": "^4.0.0",
