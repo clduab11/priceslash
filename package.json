@@ -34,7 +34,7 @@
     "react-dom": "^18",
     "redis": "^4.7.0",
     "resend": "^3.0.0",
-    "stripe": "^14.0.0",
+    "stripe": "^20.1.2",
     "tailwind-merge": "^2.0.0",
     "tsx": "^4.0.0",
     "twilio": "^5.0.0",
