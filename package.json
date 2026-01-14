@@ -32,7 +32,7 @@
     "playwright": "1.57.0",
     "react": "^18",
     "react-dom": "^18",
-    "redis": "^4.7.0",
+    "redis": "^5.10.0",
     "resend": "^3.0.0",
     "stripe": "^14.0.0",
     "tailwind-merge": "^2.0.0",
