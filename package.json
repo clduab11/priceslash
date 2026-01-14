@@ -15,7 +15,7 @@
     "prisma:generate": "prisma generate --no-hints"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.0.0",
+    "@clerk/nextjs": "^6.36.7",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.0.0-dev",
     "@prisma/config": "^7.0.0-dev",
