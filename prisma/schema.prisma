@@ -23,6 +23,7 @@ model User {
 
   subscription Subscription?
   preferences  UserPreference?
+  apiUsage     ApiUsage[]
 
   @@index([email])
   @@index([createdAt])
@@ -259,6 +260,8 @@ model ApiUsage {
   count     Int      @default(1)
   window    DateTime // Start of the rate limit window
   createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, endpoint, window])
   @@index([userId])

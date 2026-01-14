@@ -113,16 +113,16 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripePriceId: priceId,
       tier,
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
     update: {
       stripePriceId: priceId,
       tier,
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
     },
   });
@@ -144,12 +144,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  * Handle failed payment
  */
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  if (!invoice.subscription) return;
+  if (!(invoice as any).subscription) return;
 
-  console.log(`Payment failed for subscription: ${invoice.subscription}`);
+  console.log(`Payment failed for subscription: ${(invoice as any).subscription}`);
 
   await db.subscription.updateMany({
-    where: { stripeSubscriptionId: invoice.subscription as string },
+    where: { stripeSubscriptionId: (invoice as any).subscription as string },
     data: { status: 'past_due' },
   });
 }
@@ -158,14 +158,14 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
  * Handle successful invoice payment (subscription renewal)
  */
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  if (!invoice.subscription) return;
+  if (!(invoice as any).subscription) return;
 
-  console.log(`Invoice paid for subscription: ${invoice.subscription}`);
+  console.log(`Invoice paid for subscription: ${(invoice as any).subscription}`);
 
   // Reactivate subscription if it was past_due
   await db.subscription.updateMany({
     where: {
-      stripeSubscriptionId: invoice.subscription as string,
+      stripeSubscriptionId: (invoice as any).subscription as string,
       status: 'past_due',
     },
     data: { status: 'active' },

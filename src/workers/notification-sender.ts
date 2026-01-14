@@ -1,5 +1,8 @@
 import { readStream, getKey, setKey, REDIS_KEYS } from '@/lib/clients/redis';
 import { notificationManager } from '@/lib/notifications/manager';
+import { subscriberNotificationService } from '@/lib/notifications/subscriber-service';
+import { moveToDLQ } from '@/lib/streams/dlq';
+import { metrics } from '@/lib/monitoring/metrics';
 import type { ValidatedGlitch } from '@/types';
 
 const CURSOR_KEY = 'cursor:stream:anomaly_confirmed';
@@ -40,6 +43,7 @@ async function main() {
         }
 
         const glitch = JSON.parse(payload) as ValidatedGlitch;
+        await metrics.increment('notification.process.start');
 
         const dedupKey = notifiedKey(glitch.id);
         const alreadyNotified = await getKey(dedupKey);
@@ -50,6 +54,14 @@ async function main() {
         }
 
         const results = await notificationManager.notifyAll(glitch);
+        
+        // Send targeted notifications to eligible subscribers
+        await subscriberNotificationService.notifyEligibleSubscribers(glitch).catch(err => {
+          console.error('Error in subscriber notifications:', err);
+          metrics.increment('notification.subscriber.error');
+        });
+
+        await metrics.increment('notification.process.success');
         await setKey(dedupKey, '1', NOTIFY_DEDUP_TTL_SECONDS);
 
         const anySuccess = Array.from(results.values()).some((r) => r.success);
@@ -75,6 +87,14 @@ async function main() {
 
         if (count >= MAX_RETRIES) {
           console.error(`Skipping entry ${entry.id} after ${MAX_RETRIES} failed attempts`);
+          
+          await moveToDLQ(
+              REDIS_KEYS.ANOMALY_CONFIRMED,
+              entry.id,
+              entry.fields.data,
+              error
+          );
+
           failures.delete(entry.id);
           await setKey(CURSOR_KEY, entry.id);
           continue;

@@ -137,7 +137,7 @@ export interface NotificationResult {
 }
 
 export interface NotificationProvider {
-  send(glitch: ValidatedGlitch): Promise<NotificationResult>;
+  send(glitch: ValidatedGlitch, target?: string): Promise<NotificationResult>;
 }
 
 export interface Notification {

@@ -223,3 +223,44 @@ export async function isRecentlyProcessedKey(key: string, ttlSeconds = 300): Pro
 
   return true;
 }
+
+export async function pushToList(key: string, value: string): Promise<void> {
+  const backend = await getBackend();
+  if (backend.kind === 'none') return;
+
+  if (backend.kind === 'upstash') {
+    await backend.client.lpush(key, value);
+    return;
+  }
+  await backend.client.lPush(key, value);
+}
+
+export async function getListLength(key: string): Promise<number> {
+  const backend = await getBackend();
+  if (backend.kind === 'none') return 0;
+
+  if (backend.kind === 'upstash') {
+    return await backend.client.llen(key);
+  }
+  return await backend.client.lLen(key);
+}
+
+export async function getKeys(pattern: string): Promise<string[]> {
+  const backend = await getBackend();
+  if (backend.kind === 'none') return [];
+
+  if (backend.kind === 'upstash') {
+    return await backend.client.keys(pattern);
+  }
+  return await backend.client.keys(pattern);
+}
+
+export async function incrementKey(key: string): Promise<number> {
+  const backend = await getBackend();
+  if (backend.kind === 'none') return 0;
+
+  if (backend.kind === 'upstash') {
+    return await backend.client.incr(key);
+  }
+  return await backend.client.incr(key);
+}

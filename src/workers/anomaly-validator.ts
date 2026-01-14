@@ -1,5 +1,7 @@
 import { readStream, getKey, setKey, REDIS_KEYS } from '@/lib/clients/redis';
 import { validateAndProcess } from '@/lib/ai/validator';
+import { moveToDLQ } from '@/lib/streams/dlq';
+import { metrics } from '@/lib/monitoring/metrics';
 import type { PricingAnomaly } from '@/types';
 
 const CURSOR_KEY = 'cursor:stream:anomaly_detected';
@@ -35,7 +37,9 @@ async function main() {
         }
 
         const anomaly = JSON.parse(payload) as PricingAnomaly;
+        await metrics.increment('anomaly.process.start');
         await validateAndProcess(anomaly);
+        await metrics.increment('anomaly.process.success');
 
         failures.delete(entry.id);
         await setKey(CURSOR_KEY, entry.id);
@@ -47,6 +51,14 @@ async function main() {
 
         if (count >= MAX_RETRIES) {
           console.error(`Skipping entry ${entry.id} after ${MAX_RETRIES} failed attempts`);
+          
+          await moveToDLQ(
+              REDIS_KEYS.ANOMALY_DETECTED,
+              entry.id,
+              entry.fields.data, // Raw payload
+              error
+          );
+
           failures.delete(entry.id);
           await setKey(CURSOR_KEY, entry.id);
           continue;
