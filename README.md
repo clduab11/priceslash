@@ -281,7 +281,7 @@ docker compose logs -f app
 | `/api/detect` | POST | Run anomaly detection | Admin |
 | `/api/notify` | POST | Send test notification | Admin |
 | `/api/checkout` | POST | Create checkout session | Yes |
-| `/api/billing` | GET | Billing portal redirect | Yes |
+| `/api/billing/portal` | POST | Billing portal redirect | Yes |
 | `/api/webhooks/stripe` | POST | Stripe webhook handler | Signature |
 
 ---
