@@ -11,12 +11,12 @@
 
 ## The Price Glitch Economy in 2026
 
-The retail pricing error market has exploded. What was once an underground hobby has become a legitimate savings strategy embraced by millions:
+The retail pricing error market has grown significantly. What was once an underground hobby has become a legitimate savings strategy embraced by millions:
 
-- **$2.3 billion** in pricing errors honored by major retailers in 2025 alone
-- **47% increase** in price glitch communities on Discord and Reddit since 2024
-- Major retailers now honor **most pricing errors under $500** to protect brand loyalty
-- Average documented savings of **$3,200/year** for active glitch hunters
+- Major retailers honor pricing errors totaling significant amounts annually
+- Price glitch communities on Discord and Reddit have grown substantially since 2024
+- Major retailers increasingly honor pricing errors under certain thresholds to protect brand loyalty
+- Active glitch hunters report savings ranging from hundreds to several thousand dollars per year
 
 ### Why Pricing Errors Happen More Often Now
 
@@ -39,17 +39,17 @@ The result? Pricing errors occur **every single day** across major retailers. Th
 
 PriceHawk is a subscription-based platform that monitors 100+ retailer websites 24/7, using advanced AI to distinguish genuine pricing errors from legitimate sales. When a real glitch is detected, subscribers receive instant notifications via their preferred channels.
 
-### Real-World Savings Examples
+### Examples of Common Decimal-Error Pricing Patterns
 
-| Item | Listed Price | Glitch Price | Savings |
-|------|-------------|--------------|---------|
-| Sony 65" 4K OLED TV | $1,799 | $179.90 | $1,619 |
-| Apple AirPods Pro 2 | $249 | $24.90 | $224 |
-| Dyson V15 Vacuum | $749 | $74.90 | $674 |
-| Nintendo Switch OLED | $349 | $34.90 | $314 |
-| KitchenAid Stand Mixer | $449 | $44.90 | $404 |
+| Item Category | Typical List Price | Potential Glitch Price | Savings (Up To) |
+|---------------|-------------------|------------------------|-----------------|
+| Premium TVs (65"+) | $1,500-$2,000 | $150-$200 | $1,300-$1,800 |
+| Wireless Earbuds | $200-$300 | $20-$30 | $180-$270 |
+| Vacuum Cleaners | $600-$800 | $60-$80 | $520-$720 |
+| Gaming Consoles | $300-$400 | $30-$40 | $260-$360 |
+| Kitchen Appliances | $400-$500 | $40-$50 | $350-$450 |
 
-*These represent actual decimal-error pricing glitches documented in 2025. Results vary; retailer policies determine if orders are honored.*
+*These illustrate typical decimal-error pricing scenarios where a decimal point shifts one or two places. Actual outcomes vary significantly by retailer, timing, and individual circumstance. Not all pricing errors are honored—retailers have varying policies on order fulfillment. Users should verify current prices and policies before purchasing.*
 
 ---
 
