@@ -197,11 +197,9 @@ $5/mo × 10,000 users = **$50,000/mo** market opportunity
 ### 3.2 Gaps & Opportunities
 
 - **Test Coverage:** No explicit mention of automated test coverage for scrapers or anomaly detection.
-- **Monitoring/Alerting:** Only briefly mentioned; needs concrete implementation details.
-- **Proxy/Anti-bot:** No detail on proxy rotation or anti-bot strategies for scraping.
-- **Scaling:** Horizontal scaling mentioned, but no concrete autoscaling guide.
-- **MCP Integration:** Firecrawl, Tavily, Jina mentioned but not fully specified in code.
-- **Community Features:** Planned for post-launch; can be prioritized for stickiness.
+- **Monitoring/Alerting:** Only briefly mentioned; needs concrete implementation details (metrics dashboard, alerting thresholds, incident response).
+- **Scaling:** Horizontal scaling mentioned, but no concrete autoscaling guide (when to scale workers, load balancer configuration, resource thresholds).
+- **Community Features:** Planned for post-launch; can be prioritized for stickiness (user forums, deal sharing, reputation system).
 
 ### 3.3 Useful Patterns
 
