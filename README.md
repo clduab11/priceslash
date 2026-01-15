@@ -13,7 +13,7 @@
 
 The retail pricing error market has grown significantly. What was once an underground hobby has become a legitimate savings strategy embraced by millions:
 
-- Billions of dollars in pricing errors are honored by major retailers annually, according to industry observers
+- Major retailers honor pricing errors totaling significant amounts annually
 - Price glitch communities on Discord and Reddit have grown substantially since 2024
 - Major retailers increasingly honor pricing errors under certain thresholds to protect brand loyalty
 - Active glitch hunters report savings ranging from hundreds to several thousand dollars per year
@@ -49,7 +49,7 @@ PriceHawk is a subscription-based platform that monitors 100+ retailer websites 
 | Gaming Consoles | $300-$400 | $30-$40 | $260-$360 |
 | Kitchen Appliances | $400-$500 | $40-$50 | $350-$450 |
 
-*These illustrate typical decimal-error pricing scenarios where a decimal point shifts one or two places. Actual outcomes vary significantly by retailer, timing, and individual circumstance. Not all pricing errors are honored—retailers have varying policies on order fulfillment. Users should verify current prices and policies before purchasing. For questions about specific examples or verification, contact our support team.*
+*These illustrate typical decimal-error pricing scenarios where a decimal point shifts one or two places. Actual outcomes vary significantly by retailer, timing, and individual circumstance. Not all pricing errors are honored—retailers have varying policies on order fulfillment. Users should verify current prices and policies before purchasing.*
 
 ---
 
