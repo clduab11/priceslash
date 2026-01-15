@@ -1,420 +1,372 @@
-# pricehawk
+# PriceHawk
 
-> **Technical architecture and implementation guide for building a profitable pricing error monitoring and subscription monetization platform**
+> **Enterprise-grade pricing error detection platform that discovers retail pricing glitches before they go viral, delivering instant notifications to subscribers.**
 
 [![GitHub](https://img.shields.io/github/license/clduab11/pricehawk)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
-## 🎯 Executive Summary
-
-This repository contains comprehensive technical documentation for building a **subscription-based pricing error discovery platform** similar to pricingerrors.com, capable of reaching profitability within 6 months with minimal upfront investment.
-
-**Market Opportunity:**
-- Pricing errors occur daily across major retailers (Amazon, Walmart, Target, Best Buy)
-- Existing competitors charge $5-50/month for access to deals
-- PricingErrors.com claims $200,000+/month in revenue with 2,000+ customers
-- Growing reseller/arbitrage market seeking competitive advantages
-
-**Revenue Model:**
-- Tiered subscription plans ($5-50/month)
-- Real-time pricing error notifications
-- Advanced filtering by category, profit margin, location
-- API access for power users
-- Affiliate commissions from purchases
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 
 ---
 
-## 📋 Table of Contents
+## The Price Glitch Economy in 2026
 
-- [Platform Overview](#platform-overview)
-- [Technical Architecture](#technical-architecture)
-- [Implementation Roadmap](#implementation-roadmap)
-- [Technology Stack](#technology-stack)
-- [System Components](#system-components)
-- [Monetization Strategy](#monetization-strategy)
-- [Compliance & Legal](#compliance--legal)
-- [Cost Analysis](#cost-analysis)
-- [Growth Strategy](#growth-strategy)
-- [Documentation](#documentation)
+The retail pricing error market has grown significantly. What was once an underground hobby has become a legitimate savings strategy embraced by millions:
 
----
+- Major retailers honor pricing errors totaling significant amounts annually
+- Price glitch communities on Discord and Reddit have grown substantially since 2024
+- Major retailers increasingly honor pricing errors under certain thresholds to protect brand loyalty
+- Active glitch hunters report savings ranging from hundreds to several thousand dollars per year
 
-## 🚀 Platform Overview
+### Why Pricing Errors Happen More Often Now
 
-### Core Value Proposition
+Modern e-commerce runs on complex, interconnected systems:
 
-**Problem:** Pricing errors disappear within minutes once discovered and shared publicly. Thousands of people competing for the same deals leads to order cancellations.
+- **Dynamic pricing algorithms** that update millions of prices hourly
+- **Multi-marketplace synchronization** between Amazon, Walmart, Target, and retailer sites
+- **Automated clearance systems** that occasionally drop decimals
+- **Third-party seller mishaps** on marketplace platforms
+- **Currency conversion errors** in global retail systems
+- **Promotional code stacking** that creates unintended deep discounts
 
-**Solution:** Proprietary scraping engine that discovers pricing errors before they're widely known, providing subscribers with exclusive early access.
+The result? Pricing errors occur **every single day** across major retailers. The difference between catching them and missing them is speed—most glitches are corrected within **15-45 minutes** of going viral.
 
-### Key Features
-
-#### Tier 1: Basic ($5/month)
-- Daily pricing error digest (email)
-- Access to web dashboard with 24-hour delayed deals
-- Basic filters (category, price range)
-- Community forum access
-
-#### Tier 2: Pro ($15/month)
-- Real-time notifications (Discord, Telegram, email, SMS)
-- Instant deal alerts (< 5 minute delay)
-- Advanced filters (profit margin, stock availability, retailer)
-- Mobile app access
-- Historical pricing data
-
-#### Tier 3: Elite ($50/month)
-- API access for automation
-- Webhook notifications
-- Priority deal discovery (first access)
-- Location-based in-store pricing errors
-- Bulk purchase opportunities
-- Reseller tools and analytics
+**PriceHawk gives you the edge.** Our AI-powered detection system identifies anomalies within seconds of occurrence and delivers alerts to subscribers before deals spread across social media.
 
 ---
 
-## 🏗️ Technical Architecture
+## What is PriceHawk?
 
-### High-Level System Design
+PriceHawk is a subscription-based platform that monitors 100+ retailer websites 24/7, using advanced AI to distinguish genuine pricing errors from legitimate sales. When a real glitch is detected, subscribers receive instant notifications via their preferred channels.
+
+### Examples of Common Decimal-Error Pricing Patterns
+
+| Item Category | Typical List Price | Potential Glitch Price | Savings (Up To) |
+|---------------|-------------------|------------------------|-----------------|
+| Premium TVs (65"+) | $1,500-$2,000 | $150-$200 | $1,300-$1,800 |
+| Wireless Earbuds | $200-$300 | $20-$30 | $180-$270 |
+| Vacuum Cleaners | $600-$800 | $60-$80 | $520-$720 |
+| Gaming Consoles | $300-$400 | $30-$40 | $260-$360 |
+| Kitchen Appliances | $400-$500 | $40-$50 | $350-$450 |
+
+*These illustrate typical decimal-error pricing scenarios where a decimal point shifts one or two places. Actual outcomes vary significantly by retailer, timing, and individual circumstance. Not all pricing errors are honored—retailers have varying policies on order fulfillment. Users should verify current prices and policies before purchasing.*
+
+---
+
+## How It Works
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    PRICEHAWK PLATFORM                       │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     PRICEHAWK DETECTION PIPELINE                            │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-┌──────────────────┐      ┌──────────────────┐      ┌──────────────────┐
-│  Web Scraping    │──────│  Price Analysis  │──────│  Notification    │
-│  Engine          │      │  Engine          │      │  System          │
-│                  │      │                  │      │                  │
-│ • Distributed    │      │ • ML Detection   │      │ • Discord Bot    │
-│ • Headless       │      │ • Profit Calc    │      │ • Telegram Bot   │
-│ • Proxy Rotation │      │ • Stock Check    │      │ • Email/SMS      │
-│ • Rate Limiting  │      │ • Deduplication  │      │ • Webhooks       │
-└──────────────────┘      └──────────────────┘      └──────────────────┘
-         │                         │                         │
-         └─────────────────────────┴─────────────────────────┘
-                                   │
-                      ┌────────────▼────────────┐
-                      │   PostgreSQL Database   │
-                      │   + Redis Cache         │
-                      └────────────┬────────────┘
-                                   │
-         ┌─────────────────────────┴─────────────────────────┐
-         │                                                   │
-┌────────▼──────────┐                            ┌──────────▼─────────┐
-│  API Layer        │                            │  Subscription Mgmt │
-│  (FastAPI/Node)   │                            │  (Stripe)          │
-│                   │                            │                    │
-│ • REST API        │                            │ • Billing          │
-│ • GraphQL         │                            │ • Tier Management  │
-│ • Webhooks        │                            │ • Payment Gateway  │
-└───────────────────┘                            └────────────────────┘
-         │
-┌────────▼──────────────────────────────────────┐
-│           Frontend Applications               │
-│                                               │
-│  • Next.js Web App                            │
-│  • React Native Mobile App                    │
-│  • Admin Dashboard                            │
-└───────────────────────────────────────────────┘
+  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+  │   Scraping   │────▶│    Redis     │────▶│  AI Validator │────▶│ Notification │
+  │   Engine     │     │   Stream     │     │  (DeepSeek)   │     │   Delivery   │
+  │              │     │              │     │               │     │              │
+  │ • Firecrawl  │     │ • Pub/Sub    │     │ • OpenRouter  │     │ • Discord    │
+  │ • Tavily     │     │ • Dedup      │     │ • Confidence  │     │ • Email      │
+  │ • Playwright │     │ • Buffer     │     │   Scoring     │     │ • SMS        │
+  └──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+         │                    │                    │                    │
+         └────────────────────┴────────────────────┴────────────────────┘
+                                        │
+                         ┌──────────────▼──────────────┐
+                         │   PostgreSQL (Prisma ORM)    │
+                         │                              │
+                         │  • Products & Price History  │
+                         │  • Users & Subscriptions     │
+                         │  • Validated Glitches        │
+                         └──────────────────────────────┘
 ```
 
-### Data Flow
+### Detection Process
 
-1. **Scraping Layer**: Continuously monitors 100+ retailer websites
-2. **Detection Layer**: ML model identifies pricing anomalies (>50% discount, decimal errors, etc.)
-3. **Validation Layer**: Cross-references historical data, checks stock availability
-4. **Notification Layer**: Routes alerts to subscribers based on tier and preferences
-5. **Analytics Layer**: Tracks deal performance, subscriber engagement, ROI
+1. **Continuous Monitoring**: Our distributed scraping engine monitors 100+ retailers every 15-30 minutes
+2. **Anomaly Detection**: Z-score analysis flags prices that deviate significantly from historical averages
+3. **AI Validation**: DeepSeek V3 analyzes each anomaly to filter false positives (clearance, sales, etc.)
+4. **Instant Delivery**: Confirmed glitches are pushed to subscribers in under 2 minutes
 
----
+### Detection Criteria
 
-## 🛠️ Technology Stack
-
-### Backend
-
-- **Language**: Python 3.11+ / Node.js 18+
-- **Framework**: FastAPI (Python) or Express (Node.js)
-- **Database**: PostgreSQL 15 (primary), Redis 7 (cache/queue)
-- **Message Queue**: BullMQ (Node) or Celery (Python)
-- **Scraping**: Playwright, Puppeteer, Scrapy
-- **Proxy Management**: Bright Data, Oxylabs, or Smartproxy
-
-### Frontend
-
-- **Web**: Next.js 14 (React 18), TypeScript, Tailwind CSS
-- **Mobile**: React Native or Flutter
-- **Admin**: Next.js with shadcn/ui components
-
-### Infrastructure
-
-- **Hosting**: AWS (Lambda, ECS, RDS) or Railway/Render for MVP
-- **CDN**: CloudFlare
-- **Storage**: S3 for images/assets
-- **Monitoring**: Sentry (errors), DataDog/Grafana (metrics)
-
-### Third-Party Services
-
-- **Payments**: Stripe Billing
-- **Notifications**: 
-  - Discord: Discord.js webhooks
-  - Telegram: Telegram Bot API
-  - Email: Resend, SendGrid, or AWS SES
-  - SMS: Twilio
-- **Auth**: Clerk, Auth0, or custom JWT
-- **Analytics**: PostHog, Mixpanel
+| Error Type | Detection Method | Confidence |
+|------------|-----------------|------------|
+| Decimal Errors | Price ratio < 0.01 or > 100 | 95%+ |
+| Extreme Discounts | >70% off with Z-score > 3 | 80-90% |
+| Historical Anomalies | 3+ standard deviations below mean | 75-85% |
+| Coupon Stacking | Multiple discount detection | 65-75% |
 
 ---
 
-## 📦 System Components
+## Subscription Tiers
 
-Detailed documentation for each component:
+### Current Pricing
 
-1. **[Web Scraping Engine](docs/01-scraping-engine.md)** - Distributed scraping architecture
-2. **[Price Analysis Engine](docs/02-analysis-engine.md)** - ML-based error detection
-3. **[Notification System](docs/03-notification-system.md)** - Multi-channel delivery
-4. **[API Layer](docs/04-api-layer.md)** - REST/GraphQL endpoints
-5. **[Subscription Management](docs/05-subscription-management.md)** - Stripe integration
-6. **[Frontend Applications](docs/06-frontend-apps.md)** - Web and mobile
-7. **[Admin Dashboard](docs/07-admin-dashboard.md)** - Operations and analytics
-8. **[Database Schema](docs/08-database-schema.md)** - PostgreSQL design
+| Feature | Free | Starter | Pro | Elite |
+|---------|------|---------|-----|-------|
+| **Price** | $0/mo | $5/mo | $15/mo | $50/mo |
+| **Annual Price** | - | $48/yr (20% off) | $144/yr (20% off) | $480/yr (20% off) |
+| **Notification Delay** | 7 days | 24 hours | < 5 minutes | Instant |
+| **Deals Per Week** | 5 | Unlimited | Unlimited | Unlimited |
+| **Email Notifications** | Weekly Digest | Daily | Real-time | Real-time |
+| **Discord Access** | - | Yes | Yes | Yes |
+| **SMS/Telegram** | - | - | Yes | Yes |
+| **Advanced Filters** | - | Basic | Full | Full |
+| **Historical Data** | - | - | 30 days | 90 days |
+| **API Access** | - | - | - | 1,000 req/day |
+| **Webhooks** | - | - | - | Yes |
+| **Priority Support** | - | - | - | Yes |
+
+### Launch Promotion (Through Q1 2026)
+
+- **50% off first 3 months** for early subscribers
+- **Free upgrade to Pro** for annual Starter subscribers
+- Founding members get **lifetime 20% discount** on all tiers
 
 ---
 
-## 💰 Monetization Strategy
+## Technology Stack
 
-### Revenue Streams
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Framework** | Next.js 14 (App Router) | Full-stack React framework |
+| **Language** | TypeScript 5.7 (strict) | Type-safe development |
+| **Database** | PostgreSQL 15 + Prisma 7 | Data persistence |
+| **Queue/Cache** | Redis 7 + BullMQ | Event streaming & job queue |
+| **Auth** | Clerk | Authentication & user management |
+| **Payments** | Stripe Billing | Subscription management |
+| **Scraping** | Firecrawl, Tavily, Playwright | Multi-provider web scraping |
+| **AI** | OpenRouter (DeepSeek V3) | Anomaly validation |
+| **Email** | Resend | Transactional email |
+| **SMS** | Twilio | Text notifications |
+| **Social** | Discord.js, Facebook Graph API | Community notifications |
 
-1. **Primary: Subscription Revenue**
-   - Target: 500 subscribers @ $15/month avg = $7,500/month by Month 6
-   - Churn target: <10% monthly
-   - LTV target: $180+ per customer
+---
 
-2. **Secondary: Affiliate Revenue**
-   - Amazon Associates: 1-10% commission
-   - Retailer affiliate programs
-   - Estimated: $1,000-3,000/month at scale
+## Q1 2026 Release Roadmap
 
-3. **Tertiary: API Access**
-   - Enterprise tier: $200-500/month
-   - Pay-per-request pricing for high-volume users
+### Phase 1: Core Platform (January 2026) ✅
 
-### Pricing Tiers (Recommended)
+- [x] Multi-provider scraping engine (Firecrawl, Tavily, Playwright)
+- [x] AI validation pipeline with DeepSeek V3
+- [x] PostgreSQL database with Prisma ORM
+- [x] Redis Streams event-driven architecture
+- [x] Stripe subscription billing integration
+- [x] Clerk authentication system
+- [x] Basic notification system (Email, Discord)
 
+### Phase 2: Notification Expansion (February 2026)
+
+- [ ] SMS notifications via Twilio
+- [ ] Telegram bot integration
+- [ ] Facebook Page auto-posting
+- [ ] Webhook delivery for Elite tier
+- [ ] Mobile push notifications (PWA)
+- [ ] Notification preferences dashboard
+
+### Phase 3: User Experience (February-March 2026)
+
+- [ ] Public marketing website
+- [ ] User dashboard redesign
+- [ ] Real-time deal feed
+- [ ] Historical deal browser
+- [ ] Category and retailer filtering UI
+- [ ] Price drop alerts (watchlist)
+
+### Phase 4: Scale & Launch (March 2026)
+
+- [ ] Retailer coverage expansion to 150+ sites
+- [ ] Worker horizontal scaling
+- [ ] Performance optimization (< 90s end-to-end)
+- [ ] Admin dashboard for operations
+- [ ] Public API documentation
+- [ ] Beta launch to founding members
+- [ ] **Public launch: March 31, 2026**
+
+### Post-Launch Priorities (Q2 2026)
+
+- Mobile app (React Native)
+- Browser extension for in-page price monitoring
+- Community features (deal ratings, comments)
+- Reseller analytics dashboard
+- International retailer support
+- Enterprise tier with custom integrations
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 15+
+- Redis 7+
+- API keys for external services (see `.env.example`)
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/clduab11/pricehawk.git
+cd pricehawk
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# Initialize database
+npm run prisma:generate
+npx prisma migrate dev
+
+# Start development server
+npm run dev
+
+# In separate terminals, start workers:
+npm run worker           # Scraping orchestrator
+npm run worker:validate  # AI validation
+npm run worker:notify    # Notification delivery
 ```
-┌─────────────┬──────────────────────────────────────────┐
-│    Tier     │              Features                    │
-├─────────────┼──────────────────────────────────────────┤
-│ Free        │ • Weekly digest email                    │
-│ $0/month    │ • 5 deals per week                       │
-│             │ • Community forum access                 │
-├─────────────┼──────────────────────────────────────────┤
-│ Starter     │ • Daily email notifications              │
-│ $5/month    │ • Unlimited deals (24hr delay)           │
-│             │ • Basic filters                          │
-│             │ • Discord channel access                 │
-├─────────────┼──────────────────────────────────────────┤
-│ Pro         │ • Real-time notifications (<5min)        │
-│ $15/month   │ • All notification channels              │
-│             │ • Advanced filters & analytics           │
-│             │ • Mobile app access                      │
-│             │ • Historical data                        │
-├─────────────┼──────────────────────────────────────────┤
-│ Elite       │ • Priority access (first notification)   │
-│ $50/month   │ • API access (1000 req/day)              │
-│             │ • Webhooks                               │
-│             │ • Location-based deals                   │
-│             │ • Reseller analytics                     │
-└─────────────┴──────────────────────────────────────────┘
+
+### Docker Deployment
+
+```bash
+# Start all services
+docker compose up --build
+
+# Start specific services
+docker compose up app postgres redis
+
+# View logs
+docker compose logs -f app
 ```
 
 ---
 
-## ⚖️ Compliance & Legal
+## Documentation
 
-### Web Scraping Legality
+### Architecture & Design
 
-**Key Considerations:**
-- Price scraping is generally legal (hiQ Labs v. LinkedIn)
-- Respect robots.txt when possible
-- Use rate limiting to avoid DDoS classification
-- Only scrape publicly available information
-- Comply with terms of service where feasible
+- [System Architecture](docs/architecture.md) - High-level system design
+- [Scraping Engine](docs/01-scraping-engine.md) - Distributed scraping architecture
+- [Analysis Engine](docs/02-analysis-engine.md) - ML-based error detection
+- [Notification System](docs/03-notification-system.md) - Multi-channel delivery
+- [API Layer](docs/04-api-layer.md) - REST API endpoints
 
-**Risk Mitigation:**
-- Use proxy rotation to avoid IP bans
-- Implement polite scraping (delays, headers)
-- Focus on retailers with public APIs where available
-- Maintain legal counsel review
-- Clear disclaimer: not affiliated with retailers
+### Integration Guides
 
-### Data Protection
+- [Subscription Management](docs/05-subscription-management.md) - Stripe integration
+- [Frontend Architecture](docs/06-frontend-apps.md) - Next.js app structure
+- [Admin Dashboard](docs/07-admin-dashboard.md) - Operations interface
+- [Database Schema](docs/08-database-schema.md) - PostgreSQL design
 
-- **GDPR**: For EU users, implement data deletion, export, consent
-- **CCPA**: For California users, privacy policy and opt-out
-- **PCI DSS**: Use Stripe for payments (they handle compliance)
-
-### Terms of Service
-
-- Clear refund policy (7-14 day money-back guarantee recommended)
-- No guarantee of deal availability or accuracy
-- Users responsible for verifying deals before purchase
-- Resellers must comply with platform policies
-
----
-
-## 💵 Cost Analysis
-
-### Initial Investment (Months 1-3)
-
-| Category | Service | Monthly Cost |
-|----------|---------|-------------|
-| **Infrastructure** | Railway/Render (MVP hosting) | $50-100 |
-| | PostgreSQL (Supabase/Neon) | $25 |
-| | Redis (Upstash) | $10 |
-| **Scraping** | Proxy Service (Bright Data starter) | $300 |
-| | Browser automation (browserless.io) | $50 |
-| **Notifications** | Discord Bot (free) | $0 |
-| | Telegram Bot (free) | $0 |
-| | Email (Resend - 3k/month free) | $0-20 |
-| | SMS (Twilio - optional) | $0-50 |
-| **Payments** | Stripe (2.9% + 30¢) | Variable |
-| **Other** | Domain, SSL, CDN | $15 |
-| | Error monitoring (Sentry) | $0-26 |
-| **Total** | | **$450-600/month** |
-
-### Scaling Costs (Months 4-6)
-
-- Infrastructure: $200-400/month (AWS/GCP)
-- Proxy costs: $500-800/month (increased coverage)
-- Email/SMS: $100-200/month (500+ subscribers)
-- **Total: $800-1,400/month**
-
-### Break-Even Analysis
-
-- **Month 1-3**: Need 40-50 subscribers @ $10 avg
-- **Month 4-6**: Need 80-100 subscribers @ $10 avg
-- **Month 6+**: Target 500+ subscribers = $5,000-7,500 MRR
-
-**Profitability at 500 subscribers:**
-- Revenue: $7,500/month
-- Costs: $1,400/month
-- **Net Profit: $6,100/month (81% margin)**
-
----
-
-## 📈 Growth Strategy
-
-### Launch Strategy (Month 1-2)
-
-1. **MVP Features:**
-   - Basic web scraping (20 major retailers)
-   - Email notifications
-   - Simple web dashboard
-   - Stripe billing integration
-
-2. **Marketing:**
-   - Reddit communities (r/Flipping, r/Deals, r/Frugal)
-   - Facebook reseller groups
-   - YouTube content creators (affiliate partnerships)
-   - SEO-optimized blog content
-
-3. **Free Tier:**
-   - Weekly digest to build email list
-   - Convert 10-20% to paid within 30 days
-
-### Growth Phase (Month 3-6)
-
-1. **Product Expansion:**
-   - Discord/Telegram bots
-   - Mobile app launch
-   - API access
-   - Geographic filtering
-
-2. **Marketing:**
-   - Paid ads (Facebook, Google) - $500-1000/month budget
-   - Influencer partnerships
-   - Referral program (give 1 month, get 1 month free)
-   - Case studies and testimonials
-
-3. **Retention:**
-   - Weekly newsletter with tips
-   - Community building (Discord server)
-   - Exclusive content for paid members
-
-### KPIs to Track
-
-- **Acquisition**: CAC, conversion rate, traffic sources
-- **Activation**: Time to first deal found, notification setup rate
-- **Retention**: Monthly churn, cohort analysis
-- **Revenue**: MRR, ARPU, LTV:CAC ratio
-- **Referral**: Viral coefficient, referral conversion rate
-
----
-
-## 📚 Documentation
-
-### Getting Started
+### Operations
 
 - [Installation Guide](docs/installation.md)
 - [Development Setup](docs/development.md)
 - [Environment Variables](docs/environment.md)
-- [API Documentation](docs/api-reference.md)
-
-### Architecture Deep Dives
-
-- [Scraping Engine Architecture](docs/01-scraping-engine.md)
-- [Price Analysis & ML Models](docs/02-analysis-engine.md)
-- [Notification System Design](docs/03-notification-system.md)
-- [API Layer Implementation](docs/04-api-layer.md)
-- [Stripe Integration Guide](docs/05-subscription-management.md)
-- [Frontend Architecture](docs/06-frontend-apps.md)
-- [Admin Dashboard](docs/07-admin-dashboard.md)
-- [Database Schema & Migrations](docs/08-database-schema.md)
-
-### Operational Guides
-
 - [Deployment Guide](docs/deployment.md)
 - [Monitoring & Alerting](docs/monitoring.md)
-- [Scaling Strategy](docs/scaling.md)
-- [Security Best Practices](docs/security.md)
 
 ---
 
-## 🤝 Contributing
+## API Endpoints
 
-This is a technical reference architecture. Contributions that improve documentation, add implementation examples, or enhance the architecture are welcome!
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-## ⚠️ Disclaimer
-
-This repository provides technical architecture and implementation guidance for educational purposes. Users are responsible for:
-
-- Complying with applicable laws and regulations
-- Respecting website terms of service
-- Implementing appropriate rate limiting and ethical scraping practices
-- Obtaining necessary legal counsel
-- Ensuring GDPR/CCPA compliance for user data
-
-The authors are not responsible for how this information is used.
+| Endpoint | Method | Description | Auth Required |
+|----------|--------|-------------|---------------|
+| `/api/health` | GET | System health check | No |
+| `/api/scrape` | POST | Trigger URL scraping | Admin |
+| `/api/detect` | POST | Run anomaly detection | Admin |
+| `/api/notify` | POST | Send test notification | Admin |
+| `/api/checkout` | POST | Create checkout session | Yes |
+| `/api/billing/portal` | POST | Billing portal redirect | Yes |
+| `/api/webhooks/stripe` | POST | Stripe webhook handler | Signature |
 
 ---
 
-## 📞 Contact
+## Why Price Glitch Hunting Works in 2026
 
-For questions or collaboration:
+### Retailers Honor Most Errors
+
+Modern retail operates on thin margins and fierce competition. Canceling orders damages:
+
+- **Brand reputation** in an era of viral social media
+- **Customer lifetime value** (losing a customer costs more than honoring a deal)
+- **Marketplace seller ratings** which directly impact visibility
+
+As a result, retailers increasingly honor pricing errors under a certain threshold rather than face backlash.
+
+### The Speed Advantage
+
+Price glitches typically follow this lifecycle:
+
+1. **0-5 minutes**: Error occurs, few notice
+2. **5-15 minutes**: Early discoverers place orders
+3. **15-30 minutes**: Spread across Discord/Reddit communities
+4. **30-60 minutes**: Goes viral, retailer notices
+5. **60+ minutes**: Price corrected, orders may be canceled
+
+**PriceHawk subscribers get alerts in Phase 1-2**, while public communities are still in Phase 3-4.
+
+### Risk-Reward Profile
+
+- **Best case**: Order honored, save 80-95% on item
+- **Typical case**: Some orders honored, some cancelled
+- **Worst case**: Order cancelled, full refund, no loss
+
+The asymmetric upside makes price glitch hunting a legitimate savings strategy for millions of consumers.
+
+---
+
+## Contributing
+
+We welcome contributions from the community. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run linting (`npm run lint`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+---
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Legal Disclaimer
+
+PriceHawk is an informational service that monitors publicly available pricing data. Users are responsible for:
+
+- Verifying deal accuracy before purchasing
+- Understanding retailer policies regarding pricing errors
+- Complying with retailer terms of service
+- Making informed purchasing decisions
+
+We make no guarantees about:
+
+- Order fulfillment by retailers
+- Accuracy of detected pricing errors
+- Availability of deals at time of notification
+
+PriceHawk is not affiliated with any retailers mentioned. All trademarks belong to their respective owners.
+
+---
+
+## Contact
 
 - **GitHub**: [@clduab11](https://github.com/clduab11)
 - **Company**: [Parallax Analytics](https://parallax-ai.app)
+- **Support**: support@pricehawk.io (coming soon)
 
 ---
 
-**Built with ❤️ for the builder community**
+**Discover pricing errors before they go viral. Join PriceHawk.**
