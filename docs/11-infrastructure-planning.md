@@ -271,7 +271,7 @@ JINA_MCP_URL=https://jina-mcp.example.com
 JINA_API_KEY=your-jina-key
 DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
 # Optional: Postgres/Redis if needed
-PG_URL=postgres://user:pass@db:5432/pricehawk
+PG_URL=postgres://<user>:<password>@db:5432/pricehawk
 REDIS_URL=redis://redis:6379
 ```
 
