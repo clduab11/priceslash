@@ -34,7 +34,7 @@ export interface PricingAnomaly {
   id: string;
   productId: string;
   product?: Product;
-  anomalyType: "z_score" | "percentage_drop" | "decimal_error" | "historical";
+  anomalyType: "z_score" | "percentage_drop" | "decimal_error" | "historical" | "mad_score" | "iqr_outlier";
   zScore?: number;
   discountPercentage: number;
   initialConfidence: number;
@@ -46,7 +46,7 @@ export const PricingAnomalySchema = z.object({
   id: z.string(),
   productId: z.string(),
   product: ProductSchema.optional(),
-  anomalyType: z.enum(["z_score", "percentage_drop", "decimal_error", "historical"]),
+  anomalyType: z.enum(["z_score", "percentage_drop", "decimal_error", "historical", "mad_score", "iqr_outlier"]),
   zScore: z.number().optional(),
   discountPercentage: z.number(),
   initialConfidence: z.number(),
@@ -105,10 +105,13 @@ export interface ProductData {
 
 export interface DetectResult {
   is_anomaly: boolean;
-  anomaly_type?: 'z_score' | 'percentage_drop' | 'decimal_error';
+  anomaly_type?: 'z_score' | 'percentage_drop' | 'decimal_error' | 'mad_score' | 'iqr_outlier';
   z_score: number;
   discount_percentage: number;
   confidence: number;
+  // NEW FIELDS for A/B testing
+  mad_score: number;         // Double MAD score
+  iqr_flag: boolean;         // Whether price is outside adjusted IQR bounds
 }
 
 export interface ValidationResult {
