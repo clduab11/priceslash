@@ -123,8 +123,8 @@ describe('Temporal Context', () => {
     const context = analyzeTemporalContext(null);
     expect(context.isMaintenanceWindow).toBe(false);
     expect(context.confidenceModifier).toBe(0);
-    expect(context.hourOfDay).toBe(12);
-    expect(context.dayOfWeek).toBe(3);
+    expect(context.hourOfDay).toBe(null);
+    expect(context.dayOfWeek).toBe(null);
   });
 
   it('should handle undefined timestamp gracefully', () => {

@@ -72,8 +72,8 @@ export function getThresholdsForCategory(category: string | null | undefined): C
 export interface TemporalContext {
   isMaintenanceWindow: boolean;  // 2-5 AM or Sunday night
   isWeekend: boolean;
-  hourOfDay: number;
-  dayOfWeek: number;             // 0 = Sunday
+  hourOfDay: number | null;
+  dayOfWeek: number | null;      // 0 = Sunday
   confidenceModifier: number;    // Boost for suspicious timing
 }
 
@@ -86,8 +86,8 @@ export function analyzeTemporalContext(timestamp: Date | null | undefined): Temp
     return {
       isMaintenanceWindow: false,
       isWeekend: false,
-      hourOfDay: 12,
-      dayOfWeek: 3,
+      hourOfDay: null,
+      dayOfWeek: null,
       confidenceModifier: 0,
     };
   }
