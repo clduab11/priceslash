@@ -69,13 +69,13 @@ export function getThresholdsForCategory(category: string | null | undefined): C
   return CATEGORY_THRESHOLDS[normalized] ?? CATEGORY_THRESHOLDS.default;
 }
 
-export interface TemporalContext {
-  isMaintenanceWindow: boolean;  // 2-5 AM or Sunday night
-  isWeekend: boolean;
-  hourOfDay: number | null;
-  dayOfWeek: number | null;      // 0 = Sunday
-  confidenceModifier: number;    // Boost for suspicious timing
-}
+    return {
+      isMaintenanceWindow: false,
+      isWeekend: false,
+      hourOfDay: null,
+      dayOfWeek: null,
+      confidenceModifier: 0,
+    };
 
 /**
  * Analyze temporal context to detect maintenance windows and adjust confidence
