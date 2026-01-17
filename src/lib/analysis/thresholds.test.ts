@@ -230,6 +230,8 @@ describe('detectAnomaly with category and temporal context', () => {
     expect(result.thresholds_used).toBeDefined();
     expect(result.thresholds_used.mad_threshold).toBe(2.5);
     expect(result.thresholds_used.drop_threshold).toBe(40);
+    expect(result.thresholds_used.iqr_multiplier).toBe(2.0);
+    expect(result.thresholds_used.min_confidence_boost).toBe(10);
   });
 
   it('should work without options (backward compatibility)', () => {

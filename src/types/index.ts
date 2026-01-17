@@ -122,6 +122,8 @@ export interface DetectResult {
   thresholds_used: {
     mad_threshold: number;
     drop_threshold: number;
+    iqr_multiplier: number;
+    min_confidence_boost: number;
   };
 }
 

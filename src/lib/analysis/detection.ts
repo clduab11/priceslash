@@ -268,6 +268,8 @@ export function detectAnomaly(
     thresholds_used: {
       mad_threshold: thresholds.madThreshold,
       drop_threshold: thresholds.dropThreshold,
+      iqr_multiplier: thresholds.iqrMultiplier,
+      min_confidence_boost: thresholds.minConfidenceBoost,
     },
   };
 }

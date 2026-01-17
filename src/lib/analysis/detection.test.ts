@@ -265,6 +265,8 @@ describe('Detection Module', () => {
       expect(result.temporal_context.is_maintenance_window).toBe(false);
       expect(result.thresholds_used.mad_threshold).toBe(3.0);
       expect(result.thresholds_used.drop_threshold).toBe(50);
+      expect(result.thresholds_used.iqr_multiplier).toBe(2.2);
+      expect(result.thresholds_used.min_confidence_boost).toBe(0);
     });
 
     it('should accept options with category', () => {
@@ -273,6 +275,8 @@ describe('Detection Module', () => {
       expect(result.category_applied).toBe('electronics');
       expect(result.thresholds_used.mad_threshold).toBe(2.5);
       expect(result.thresholds_used.drop_threshold).toBe(40);
+      expect(result.thresholds_used.iqr_multiplier).toBe(2.0);
+      expect(result.thresholds_used.min_confidence_boost).toBe(10);
     });
 
     it('should accept options with timestamp', () => {
