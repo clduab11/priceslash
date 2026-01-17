@@ -1335,17 +1335,6 @@ export class MandatoryToolUseError extends Error {
 }
 
 /**
- * Error thrown when a disabled tool is attempted to be executed
- */
-export class ToolNotEnabledError extends Error {
-  constructor(iteration: number, toolName: string, enabledTools: string[]) {
-    const enabledList = enabledTools.length > 0 ? enabledTools.join(', ') : 'none';
-    super(`Tool '${toolName}' is not enabled at iteration ${iteration}. Enabled tools: ${enabledList}`);
-    this.name = 'ToolNotEnabledError';
-  }
-}
-
-/**
  * Agent execution state
  */
 export interface AgentState {
