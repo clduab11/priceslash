@@ -80,6 +80,7 @@ export function calculateZScore(currentPrice: number, historicalPrices: number[]
  * Uses separate MAD values for prices below and above median
  * MAD = 1.4826 × median(|Xi - median(X)|)
  * Modified Z-Score = (median(X) - Xi) / MAD
+ * (Positive values indicate the current price is below median)
  * Returns 0 if insufficient data (< 10 samples)
  */
 export function calculateDoubleMadScore(currentPrice: number, historicalPrices: number[]): number {
@@ -134,11 +135,18 @@ export function isOutsideAdjustedIQR(currentPrice: number, historicalPrices: num
   const sorted = [...historicalPrices].sort((a, b) => a - b);
   const n = sorted.length;
   
-  // Calculate quartiles
-  const q1Index = Math.floor(n * 0.25);
-  const q3Index = Math.floor(n * 0.75);
-  const q1 = sorted[q1Index];
-  const q3 = sorted[q3Index];
+  // Calculate quartiles using linear interpolation (R type 7 - default in R and NumPy)
+  const q1Index = (n - 1) * 0.25;
+  const q3Index = (n - 1) * 0.75;
+  
+  const q1Lower = Math.floor(q1Index);
+  const q1Upper = Math.ceil(q1Index);
+  const q1 = sorted[q1Lower] + (sorted[q1Upper] - sorted[q1Lower]) * (q1Index - q1Lower);
+  
+  const q3Lower = Math.floor(q3Index);
+  const q3Upper = Math.ceil(q3Index);
+  const q3 = sorted[q3Lower] + (sorted[q3Upper] - sorted[q3Lower]) * (q3Index - q3Lower);
+  
   const iqr = q3 - q1;
   
   if (iqr === 0) return false;
@@ -184,9 +192,10 @@ export function detectAnomaly(
   const isMadAnomaly = madScore > 3.0; // Primary statistical signal
   const isDecimalError = originalPrice !== null && originalPrice > 0 && currentPrice / originalPrice < 0.01;
 
-  const isAnomaly = isPercentageDrop || isMadAnomaly || isDecimalError;
+  // Include both MAD and Z-score for backward compatibility
+  const isAnomaly = isPercentageDrop || isMadAnomaly || isZScoreAnomaly || isDecimalError;
 
-  // Determine anomaly type (prioritize decimal error, then MAD, then percentage)
+  // Determine anomaly type (prioritize decimal error, then MAD, then Z-score, then percentage)
   let anomalyType: DetectResult['anomaly_type'];
   if (isDecimalError) {
     anomalyType = 'decimal_error';
@@ -194,10 +203,10 @@ export function detectAnomaly(
     anomalyType = 'mad_score';
   } else if (iqrFlag) {
     anomalyType = 'iqr_outlier';
-  } else if (isPercentageDrop) {
-    anomalyType = 'percentage_drop';
   } else if (isZScoreAnomaly) {
     anomalyType = 'z_score';
+  } else if (isPercentageDrop) {
+    anomalyType = 'percentage_drop';
   }
 
   // Calculate confidence based on signals
