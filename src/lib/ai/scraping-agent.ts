@@ -11,7 +11,7 @@
 
 import { z } from 'zod';
 import { zodToJsonSchema as convertZodToJsonSchema } from 'zod-to-json-schema';
-import { ProductData, Product } from '@/types';
+import { ProductData } from '@/types';
 
 // ============================================================================
 // Tool Schema Definitions
@@ -137,7 +137,7 @@ interface FirecrawlScrapeResult {
 }
 
 async function executeFirecrawlScrape(input: FirecrawlScrapeInput): Promise<ToolResult<FirecrawlScrapeResult>> {
-  return firecrawlRequest<{ success: boolean; data: FirecrawlScrapeResult }>('/scrape', 'POST', {
+  const result = await firecrawlRequest<{ success: boolean; data: FirecrawlScrapeResult }>('/scrape', 'POST', {
     url: input.url,
     formats: input.formats ?? ['markdown'],
     includeTags: input.includeTags,
@@ -150,11 +150,12 @@ async function executeFirecrawlScrape(input: FirecrawlScrapeInput): Promise<Tool
     removeBase64Images: input.removeBase64Images ?? true,
     location: input.location,
     actions: input.actions,
-  }).then(result => ({
+  });
+  return {
     success: result.success,
     data: result.data?.data,
     error: result.error,
-  }));
+  };
 }
 
 // Tool 2: Firecrawl Crawl
@@ -185,7 +186,7 @@ interface FirecrawlCrawlResult {
 }
 
 async function executeFirecrawlCrawl(input: FirecrawlCrawlInput): Promise<ToolResult<FirecrawlCrawlResult>> {
-  return firecrawlRequest<{ success: boolean; id: string }>('/crawl', 'POST', {
+  const result = await firecrawlRequest<{ success: boolean; id: string }>('/crawl', 'POST', {
     url: input.url,
     maxDepth: input.maxDepth,
     limit: input.limit,
@@ -196,11 +197,12 @@ async function executeFirecrawlCrawl(input: FirecrawlCrawlInput): Promise<ToolRe
     ignoreSitemap: input.ignoreSitemap,
     scrapeOptions: input.scrapeOptions,
     webhook: input.webhook,
-  }).then(result => ({
+  });
+  return {
     success: result.success,
     data: result.data ? { id: result.data.id, status: 'started' } : undefined,
     error: result.error,
-  }));
+  };
 }
 
 // Tool 3: Firecrawl Crawl Status
@@ -241,18 +243,19 @@ interface FirecrawlMapResult {
 }
 
 async function executeFirecrawlMap(input: FirecrawlMapInput): Promise<ToolResult<FirecrawlMapResult>> {
-  return firecrawlRequest<{ success: boolean; links: string[] }>('/map', 'POST', {
+  const result = await firecrawlRequest<{ success: boolean; links: string[] }>('/map', 'POST', {
     url: input.url,
     search: input.search,
     ignoreSitemap: input.ignoreSitemap,
     sitemapOnly: input.sitemapOnly,
     includeSubdomains: input.includeSubdomains,
     limit: input.limit,
-  }).then(result => ({
+  });
+  return {
     success: result.success,
     data: result.data ? { links: result.data.links } : undefined,
     error: result.error,
-  }));
+  };
 }
 
 // Tool 5: Firecrawl Extract (LLM extraction)
@@ -272,17 +275,18 @@ interface FirecrawlExtractResult {
 }
 
 async function executeFirecrawlExtract(input: FirecrawlExtractInput): Promise<ToolResult<FirecrawlExtractResult>> {
-  return firecrawlRequest<{ success: boolean; id: string }>('/extract', 'POST', {
+  const result = await firecrawlRequest<{ success: boolean; id: string }>('/extract', 'POST', {
     urls: input.urls,
     prompt: input.prompt,
     schema: input.schema,
     systemPrompt: input.systemPrompt,
     allowExternalLinks: input.allowExternalLinks,
-  }).then(result => ({
+  });
+  return {
     success: result.success,
     data: result.data ? { id: result.data.id, status: 'processing' } : undefined,
     error: result.error,
-  }));
+  };
 }
 
 // Tool 6: Firecrawl Batch Scrape
@@ -301,16 +305,17 @@ interface FirecrawlBatchScrapeResult {
 }
 
 async function executeFirecrawlBatchScrape(input: FirecrawlBatchScrapeInput): Promise<ToolResult<FirecrawlBatchScrapeResult>> {
-  return firecrawlRequest<{ success: boolean; id: string }>('/batch/scrape', 'POST', {
+  const result = await firecrawlRequest<{ success: boolean; id: string }>('/batch/scrape', 'POST', {
     urls: input.urls,
     formats: input.formats,
     onlyMainContent: input.onlyMainContent,
     webhook: input.webhook,
-  }).then(result => ({
+  });
+  return {
     success: result.success,
     data: result.data ? { id: result.data.id, status: 'processing' } : undefined,
     error: result.error,
-  }));
+  };
 }
 
 // ============================================================================
@@ -487,10 +492,17 @@ async function executeTavilyExtract(input: TavilyExtractInput): Promise<ToolResu
 // Jina.ai Tools (7 tools)
 // ============================================================================
 
+const JINA_READER_URL = 'https://r.jina.ai';
+const JINA_SEARCH_URL = 'https://s.jina.ai';
+const JINA_GROUNDING_URL = 'https://g.jina.ai';
+const JINA_API_URL = 'https://api.jina.ai';
+const JINA_SEGMENT_URL = 'https://segment.jina.ai';
+
 /**
  * Helper to make Jina API requests
  */
 async function jinaRequest<T>(
+  baseUrl: string,
   endpoint: string,
   options: {
     method?: 'GET' | 'POST';
@@ -510,7 +522,7 @@ async function jinaRequest<T>(
   }
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       method: options.method || 'GET',
       headers,
       body: options.body ? JSON.stringify(options.body) : undefined,
@@ -588,7 +600,7 @@ async function executeJinaReader(input: JinaReaderInput): Promise<ToolResult<Jin
   if (input.timeout) headers['X-Timeout'] = input.timeout.toString();
   if (input.proxyUrl) headers['X-Proxy-Url'] = input.proxyUrl;
 
-  return jinaRequest<JinaReaderResult>(`https://r.jina.ai/${input.url}`, {
+  return jinaRequest<JinaReaderResult>(JINA_READER_URL, `/${input.url}`, {
     method: 'POST',
     headers,
   });
@@ -623,7 +635,7 @@ async function executeJinaSearch(input: JinaSearchInput): Promise<ToolResult<Jin
   if (input.withImages) headers['X-With-Images'] = 'true';
   if (input.count) headers['X-Max-Results'] = input.count.toString();
 
-  return jinaRequest<JinaSearchResult>(`https://s.jina.ai/${encodedQuery}`, {
+  return jinaRequest<JinaSearchResult>(JINA_SEARCH_URL, `/${encodedQuery}`, {
     headers,
   });
 }
@@ -660,7 +672,7 @@ async function executeJinaGrounding(input: JinaGroundingInput): Promise<ToolResu
     headers['X-References'] = input.references.join(',');
   }
 
-  return jinaRequest<JinaGroundingResult>(`https://g.jina.ai/${encodedStatement}`, {
+  return jinaRequest<JinaGroundingResult>(JINA_GROUNDING_URL, `/${encodedStatement}`, {
     headers,
   });
 }
@@ -697,7 +709,7 @@ interface JinaRerankResult {
 }
 
 async function executeJinaRerank(input: JinaRerankInput): Promise<ToolResult<JinaRerankResult>> {
-  return jinaRequest<JinaRerankResult>('https://api.jina.ai/v1/rerank', {
+  return jinaRequest<JinaRerankResult>(JINA_API_URL, '/v1/rerank', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -736,7 +748,7 @@ interface JinaSegmentResult {
 }
 
 async function executeJinaSegment(input: JinaSegmentInput): Promise<ToolResult<JinaSegmentResult>> {
-  return jinaRequest<JinaSegmentResult>('https://segment.jina.ai/', {
+  return jinaRequest<JinaSegmentResult>(JINA_SEGMENT_URL, '/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -777,7 +789,7 @@ interface JinaClassifyResult {
 }
 
 async function executeJinaClassify(input: JinaClassifyInput): Promise<ToolResult<JinaClassifyResult>> {
-  return jinaRequest<JinaClassifyResult>('https://api.jina.ai/v1/classify', {
+  return jinaRequest<JinaClassifyResult>(JINA_API_URL, '/v1/classify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -831,7 +843,7 @@ interface JinaEmbedResult {
 }
 
 async function executeJinaEmbed(input: JinaEmbedInput): Promise<ToolResult<JinaEmbedResult>> {
-  return jinaRequest<JinaEmbedResult>('https://api.jina.ai/v1/embeddings', {
+  return jinaRequest<JinaEmbedResult>(JINA_API_URL, '/v1/embeddings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -1274,6 +1286,16 @@ export class MandatoryToolUseError extends Error {
 }
 
 /**
+ * Error thrown when attempting to use a disabled tool
+ */
+export class ToolNotEnabledError extends Error {
+  constructor(toolName: string, iteration: number) {
+    super(`Tool "${toolName}" is not enabled at iteration ${iteration}`);
+    this.name = 'ToolNotEnabledError';
+  }
+}
+
+/**
  * Agent execution state
  */
 export interface AgentState {
@@ -1372,11 +1394,47 @@ export class ScrapingAgent {
       return { toolCalls: [], shouldContinue: false };
     }
 
+    // Validate that all requested tools are enabled
+    for (const call of toolCalls) {
+      if (!this.config.enabledTools.includes(call.name)) {
+        throw new ToolNotEnabledError(call.name, this.state.iteration);
+      }
+    }
+
     // Execute all tool calls
     const results: AgentStepResult['toolCalls'] = [];
 
     for (const call of toolCalls) {
       const startTime = Date.now();
+      
+      // Validate tool is enabled before execution
+      if (!this.config.enabledTools.includes(call.name)) {
+        const duration = Date.now() - startTime;
+        const result: ToolResult = {
+          success: false,
+          error: `Tool '${call.name}' is not enabled. Enabled tools: ${this.config.enabledTools.length > 0 ? this.config.enabledTools.join(', ') : 'none'}`
+        };
+        
+        results.push({
+          id: call.id,
+          name: call.name,
+          arguments: call.arguments,
+          result,
+          duration,
+        });
+
+        // Track in history
+        this.state.toolCallHistory.push({
+          iteration: this.state.iteration,
+          toolName: call.name,
+          success: false,
+          duration,
+        });
+
+        this.state.totalToolCalls++;
+        continue;
+      }
+      
       const result = await executeTool(call.name, call.arguments);
       const duration = Date.now() - startTime;
 

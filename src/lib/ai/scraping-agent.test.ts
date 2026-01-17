@@ -2,7 +2,7 @@
  * Tests for Scraping Agent with 17 Tools
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   SCRAPING_TOOLS,
   getTool,
@@ -11,6 +11,7 @@ import {
   getToolSchemas,
   ScrapingAgent,
   MandatoryToolUseError,
+  ToolNotEnabledError,
   createProductDiscoveryAgent,
   createPriceMonitoringAgent,
   createDealVerificationAgent,
@@ -131,12 +132,27 @@ describe('Tool Execution', () => {
 
 describe('Scraping Agent', () => {
   let agent: ScrapingAgent;
+  let originalFetch: typeof global.fetch;
 
   beforeEach(() => {
+    // Mock global fetch to avoid real HTTP requests
+    originalFetch = global.fetch;
+    global.fetch = async () => {
+      return new Response(JSON.stringify({ success: true, data: {} }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    };
+
     agent = new ScrapingAgent({
       maxIterations: 5,
       mandatoryToolUse: true,
     });
+  });
+
+  afterEach(() => {
+    // Restore original fetch
+    global.fetch = originalFetch;
   });
 
   it('should initialize with correct default state', () => {
@@ -167,6 +183,38 @@ describe('Scraping Agent', () => {
     const result = await permissiveAgent.step([]);
     expect(result.shouldContinue).toBe(true);
     expect(result.toolCalls).toHaveLength(0);
+  });
+
+  it('should throw ToolNotEnabledError when disabled tool is called', async () => {
+    const restrictedAgent = new ScrapingAgent({
+      enabledTools: ['firecrawl_scrape'],
+    });
+
+    await expect(restrictedAgent.step([
+      {
+        id: 'call-1',
+        name: 'jina_reader',
+        arguments: { url: 'https://example.com' },
+      },
+    ])).rejects.toThrow(ToolNotEnabledError);
+  });
+
+  it('should allow enabled tool to be called', async () => {
+    const restrictedAgent = new ScrapingAgent({
+      enabledTools: ['firecrawl_scrape'],
+      mandatoryToolUse: false,
+    });
+
+    const result = await restrictedAgent.step([
+      {
+        id: 'call-1',
+        name: 'firecrawl_scrape',
+        arguments: { url: 'https://example.com' },
+      },
+    ]);
+
+    expect(result.shouldContinue).toBe(true);
+    expect(result.toolCalls).toHaveLength(1);
   });
 
   it('should track tool call history', async () => {
