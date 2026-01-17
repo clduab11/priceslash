@@ -491,10 +491,17 @@ async function executeTavilyExtract(input: TavilyExtractInput): Promise<ToolResu
 // Jina.ai Tools (7 tools)
 // ============================================================================
 
+const JINA_READER_URL = 'https://r.jina.ai';
+const JINA_SEARCH_URL = 'https://s.jina.ai';
+const JINA_GROUNDING_URL = 'https://g.jina.ai';
+const JINA_API_URL = 'https://api.jina.ai';
+const JINA_SEGMENT_URL = 'https://segment.jina.ai';
+
 /**
  * Helper to make Jina API requests
  */
 async function jinaRequest<T>(
+  baseUrl: string,
   endpoint: string,
   options: {
     method?: 'GET' | 'POST';
@@ -514,7 +521,7 @@ async function jinaRequest<T>(
   }
 
   try {
-    const response = await fetch(endpoint, {
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       method: options.method || 'GET',
       headers,
       body: options.body ? JSON.stringify(options.body) : undefined,
@@ -592,7 +599,7 @@ async function executeJinaReader(input: JinaReaderInput): Promise<ToolResult<Jin
   if (input.timeout) headers['X-Timeout'] = input.timeout.toString();
   if (input.proxyUrl) headers['X-Proxy-Url'] = input.proxyUrl;
 
-  return jinaRequest<JinaReaderResult>(`https://r.jina.ai/${input.url}`, {
+  return jinaRequest<JinaReaderResult>(JINA_READER_URL, `/${input.url}`, {
     method: 'POST',
     headers,
   });
@@ -627,7 +634,7 @@ async function executeJinaSearch(input: JinaSearchInput): Promise<ToolResult<Jin
   if (input.withImages) headers['X-With-Images'] = 'true';
   if (input.count) headers['X-Max-Results'] = input.count.toString();
 
-  return jinaRequest<JinaSearchResult>(`https://s.jina.ai/${encodedQuery}`, {
+  return jinaRequest<JinaSearchResult>(JINA_SEARCH_URL, `/${encodedQuery}`, {
     headers,
   });
 }
@@ -664,7 +671,7 @@ async function executeJinaGrounding(input: JinaGroundingInput): Promise<ToolResu
     headers['X-References'] = input.references.join(',');
   }
 
-  return jinaRequest<JinaGroundingResult>(`https://g.jina.ai/${encodedStatement}`, {
+  return jinaRequest<JinaGroundingResult>(JINA_GROUNDING_URL, `/${encodedStatement}`, {
     headers,
   });
 }
@@ -701,7 +708,7 @@ interface JinaRerankResult {
 }
 
 async function executeJinaRerank(input: JinaRerankInput): Promise<ToolResult<JinaRerankResult>> {
-  return jinaRequest<JinaRerankResult>('https://api.jina.ai/v1/rerank', {
+  return jinaRequest<JinaRerankResult>(JINA_API_URL, '/v1/rerank', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -740,7 +747,7 @@ interface JinaSegmentResult {
 }
 
 async function executeJinaSegment(input: JinaSegmentInput): Promise<ToolResult<JinaSegmentResult>> {
-  return jinaRequest<JinaSegmentResult>('https://segment.jina.ai/', {
+  return jinaRequest<JinaSegmentResult>(JINA_SEGMENT_URL, '/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -781,7 +788,7 @@ interface JinaClassifyResult {
 }
 
 async function executeJinaClassify(input: JinaClassifyInput): Promise<ToolResult<JinaClassifyResult>> {
-  return jinaRequest<JinaClassifyResult>('https://api.jina.ai/v1/classify', {
+  return jinaRequest<JinaClassifyResult>(JINA_API_URL, '/v1/classify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
@@ -835,7 +842,7 @@ interface JinaEmbedResult {
 }
 
 async function executeJinaEmbed(input: JinaEmbedInput): Promise<ToolResult<JinaEmbedResult>> {
-  return jinaRequest<JinaEmbedResult>('https://api.jina.ai/v1/embeddings', {
+  return jinaRequest<JinaEmbedResult>(JINA_API_URL, '/v1/embeddings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: {
