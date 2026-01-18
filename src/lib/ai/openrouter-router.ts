@@ -30,134 +30,138 @@ export interface ModelConfig {
 }
 
 /**
- * Top 12 Free Models on OpenRouter (as of Jan 2026)
+ * Top 12 Free Models on OpenRouter (Updated January 2026)
+ * Sources: https://openrouter.ai/collections/free-models
+ *          https://www.teamday.ai/blog/best-free-ai-models-openrouter-2026
+ *
  * Ranked by performance benchmarks and real-world usage
- * Weights adjusted based on reliability and output quality
+ * Weights adjusted based on reliability, output quality, and task suitability
  */
 export const FREE_MODELS: ModelConfig[] = [
-  // Tier 1: Best performers (highest weights)
+  // Tier 1: Best performers (highest weights) - Latest flagship models
   {
-    id: 'google/gemini-2.0-flash-exp:free',
-    name: 'Gemini 2.0 Flash',
-    weight: 15,
+    id: 'google/gemini-2.5-flash:free',
+    name: 'Gemini 2.5 Flash',
+    weight: 16,
     tier: 'standard',
     contextWindow: 1048576,
-    strengths: ['fast', 'json', 'reasoning'],
+    strengths: ['fast', 'json', 'reasoning', 'multimodal'],
     costPer1kTokens: 0,
   },
   {
-    id: 'google/gemini-exp-1206:free',
-    name: 'Gemini Exp 1206',
+    id: 'xiaomi/mimo-v2-flash:free',
+    name: 'MiMo V2 Flash',
+    weight: 15,
+    tier: 'standard',
+    contextWindow: 262144,
+    strengths: ['coding', 'reasoning', 'agents', 'hybrid-thinking'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'meta-llama/llama-4-maverick:free',
+    name: 'Llama 4 Maverick',
     weight: 14,
     tier: 'standard',
-    contextWindow: 32768,
-    strengths: ['reasoning', 'analysis', 'json'],
+    contextWindow: 131072,
+    strengths: ['instruction-following', 'json', 'reasoning'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'deepseek/deepseek-r1-0528:free',
+    name: 'DeepSeek R1 (May 2028)',
+    weight: 13,
+    tier: 'standard',
+    contextWindow: 163840,
+    strengths: ['reasoning', 'math', 'analysis', 'open-reasoning'],
+    costPer1kTokens: 0,
+  },
+
+  // Tier 2: Strong performers (medium weights) - Specialized & reliable
+  {
+    id: 'mistralai/devstral-2512:free',
+    name: 'Devstral 2512',
+    weight: 12,
+    tier: 'standard',
+    contextWindow: 262144,
+    strengths: ['coding', 'agentic', 'codebase-exploration'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'qwen/qwen3-coder:free',
+    name: 'Qwen3 Coder',
+    weight: 11,
+    tier: 'standard',
+    contextWindow: 262144,
+    strengths: ['coding', 'reasoning', 'json'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'google/gemini-3-flash-preview:free',
+    name: 'Gemini 3 Flash Preview',
+    weight: 10,
+    tier: 'standard',
+    contextWindow: 1048576,
+    strengths: ['reasoning', 'analysis', 'multimodal'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'deepseek/deepseek-v3.2:free',
+    name: 'DeepSeek V3.2',
+    weight: 9,
+    tier: 'standard',
+    contextWindow: 131072,
+    strengths: ['roleplay', 'science', 'reasoning'],
+    costPer1kTokens: 0,
+  },
+
+  // Tier 3: Reliable fallbacks (lower weights) - Solid alternatives
+  {
+    id: 'meta-llama/llama-4-scout:free',
+    name: 'Llama 4 Scout',
+    weight: 8,
+    tier: 'standard',
+    contextWindow: 131072,
+    strengths: ['fast', 'efficient', 'json'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'nvidia/nemotron-3-nano:free',
+    name: 'Nemotron 3 Nano',
+    weight: 7,
+    tier: 'standard',
+    contextWindow: 262144,
+    strengths: ['agentic', 'instruction-following'],
+    costPer1kTokens: 0,
+  },
+  {
+    id: 'mistralai/mistral-small-3.1:free',
+    name: 'Mistral Small 3.1',
+    weight: 6,
+    tier: 'standard',
+    contextWindow: 131072,
+    strengths: ['fast', 'efficient', 'json'],
     costPer1kTokens: 0,
   },
   {
     id: 'meta-llama/llama-3.3-70b-instruct:free',
     name: 'Llama 3.3 70B',
-    weight: 13,
+    weight: 5,
     tier: 'standard',
     contextWindow: 131072,
     strengths: ['instruction-following', 'json', 'coding'],
     costPer1kTokens: 0,
   },
-  {
-    id: 'qwen/qwen-2.5-72b-instruct:free',
-    name: 'Qwen 2.5 72B',
-    weight: 12,
-    tier: 'standard',
-    contextWindow: 131072,
-    strengths: ['multilingual', 'reasoning', 'json'],
-    costPer1kTokens: 0,
-  },
-
-  // Tier 2: Strong performers (medium weights)
-  {
-    id: 'deepseek/deepseek-r1-distill-llama-70b:free',
-    name: 'DeepSeek R1 Distill 70B',
-    weight: 11,
-    tier: 'standard',
-    contextWindow: 131072,
-    strengths: ['reasoning', 'math', 'analysis'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'nvidia/llama-3.1-nemotron-70b-instruct:free',
-    name: 'Nemotron 70B',
-    weight: 10,
-    tier: 'standard',
-    contextWindow: 131072,
-    strengths: ['instruction-following', 'helpfulness'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'qwen/qwq-32b-preview:free',
-    name: 'QwQ 32B Preview',
-    weight: 9,
-    tier: 'standard',
-    contextWindow: 32768,
-    strengths: ['reasoning', 'chain-of-thought'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'google/gemini-2.0-flash-thinking-exp:free',
-    name: 'Gemini 2.0 Flash Thinking',
-    weight: 8,
-    tier: 'standard',
-    contextWindow: 1048576,
-    strengths: ['reasoning', 'analysis'],
-    costPer1kTokens: 0,
-  },
-
-  // Tier 3: Reliable fallbacks (lower weights)
-  {
-    id: 'mistralai/mistral-small-24b-instruct-2501:free',
-    name: 'Mistral Small 24B',
-    weight: 7,
-    tier: 'standard',
-    contextWindow: 32768,
-    strengths: ['fast', 'efficient', 'json'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'deepseek/deepseek-r1-distill-qwen-32b:free',
-    name: 'DeepSeek R1 Qwen 32B',
-    weight: 6,
-    tier: 'standard',
-    contextWindow: 131072,
-    strengths: ['reasoning', 'analysis'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'google/learnlm-1.5-pro-experimental:free',
-    name: 'LearnLM 1.5 Pro',
-    weight: 5,
-    tier: 'standard',
-    contextWindow: 32768,
-    strengths: ['educational', 'explanation'],
-    costPer1kTokens: 0,
-  },
-  {
-    id: 'nousresearch/hermes-3-llama-3.1-405b:free',
-    name: 'Hermes 3 405B',
-    weight: 4,
-    tier: 'standard',
-    contextWindow: 131072,
-    strengths: ['general', 'creative'],
-    costPer1kTokens: 0,
-  },
 ];
 
 /**
- * SOTA Models for Unicorn Opportunities
+ * SOTA Models for Unicorn Opportunities (Updated January 2026)
  * These are paid but reserved for high-value validations
+ * Used only when unicorn detection criteria are met (~5% of requests)
  */
 export const SOTA_MODELS: ModelConfig[] = [
   {
-    id: 'anthropic/claude-3.5-sonnet',
-    name: 'Claude 3.5 Sonnet',
+    id: 'anthropic/claude-sonnet-4',
+    name: 'Claude Sonnet 4',
     weight: 50,
     tier: 'sota',
     contextWindow: 200000,
@@ -165,8 +169,8 @@ export const SOTA_MODELS: ModelConfig[] = [
     costPer1kTokens: 0.003,
   },
   {
-    id: 'openai/gpt-4o',
-    name: 'GPT-4o',
+    id: 'openai/gpt-4.5-turbo',
+    name: 'GPT-4.5 Turbo',
     weight: 30,
     tier: 'sota',
     contextWindow: 128000,
@@ -174,12 +178,12 @@ export const SOTA_MODELS: ModelConfig[] = [
     costPer1kTokens: 0.005,
   },
   {
-    id: 'google/gemini-pro-1.5',
-    name: 'Gemini Pro 1.5',
+    id: 'google/gemini-2.5-pro',
+    name: 'Gemini 2.5 Pro',
     weight: 20,
     tier: 'sota',
     contextWindow: 2097152,
-    strengths: ['long-context', 'reasoning'],
+    strengths: ['long-context', 'reasoning', 'multimodal'],
     costPer1kTokens: 0.00125,
   },
 ];
@@ -439,8 +443,14 @@ export async function routedCompletion(
   } catch (error) {
     reportModelError(model.id);
 
-    // Fallback: try another model
-    const fallbackModel = selectStandardModel();
+    // Fallback: try another model (ensure it's different from primary)
+    let fallbackModel = selectStandardModel();
+    let attempts = 0;
+    while (fallbackModel.id === model.id && attempts < 5) {
+      fallbackModel = selectStandardModel();
+      attempts++;
+    }
+
     if (fallbackModel.id !== model.id) {
       try {
         const response = await callOpenRouter(apiKey, fallbackModel.id, options);

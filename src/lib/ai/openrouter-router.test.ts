@@ -174,15 +174,15 @@ describe('OpenRouter Weighted Router', () => {
       }
 
       // Higher weight models should have more calls
-      // Gemini 2.0 Flash (weight 15) should have more than Hermes (weight 4)
+      // Gemini 2.5 Flash (weight 16) should have more than Llama 3.3 (weight 5)
       const geminiFlash = FREE_MODELS.find(
-        (m) => m.id === 'google/gemini-2.0-flash-exp:free'
+        (m) => m.id === 'google/gemini-2.5-flash:free'
       )!;
-      const hermes = FREE_MODELS.find(
-        (m) => m.id === 'nousresearch/hermes-3-llama-3.1-405b:free'
+      const llama33 = FREE_MODELS.find(
+        (m) => m.id === 'meta-llama/llama-3.3-70b-instruct:free'
       )!;
 
-      expect(counts[geminiFlash.id]).toBeGreaterThan(counts[hermes.id]);
+      expect(counts[geminiFlash.id]).toBeGreaterThan(counts[llama33.id]);
     });
   });
 
@@ -287,11 +287,13 @@ describe('OpenRouter Weighted Router', () => {
         if (callCount === 1) {
           return Promise.resolve({
             ok: false,
+            status: 429,
             text: () => Promise.resolve('Rate limited'),
           });
         }
         return Promise.resolve({
           ok: true,
+          status: 200,
           json: () =>
             Promise.resolve({
               choices: [{ message: { content: '{"result": "fallback"}' } }],
