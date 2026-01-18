@@ -1,8 +1,5 @@
 import { ProductData } from '@/scrapers/types';
-
-// OpenRouter API configuration
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'deepseek/deepseek-chat'; // DeepSeek V3 - Cost effective and good at extracting structure
+import { routedCompletion } from './openrouter-router';
 
 const SYSTEM_PROMPT = `You are an expert data extraction AI. Your job is to extract e-commerce product information from raw markdown content.
 
@@ -30,17 +27,6 @@ Instructions:
 6. Infer stock status from keywords like "Sold Out", "Add to Cart", etc.
 7. Return ONLY valid JSON in the format: { "products": [...results] }`;
 
-interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-  error?: {
-    message: string;
-  };
-}
-
 export async function extractProductsFromMarkdown(markdown: string, sourceUrl: string): Promise<ProductData[]> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
@@ -49,39 +35,20 @@ export async function extractProductsFromMarkdown(markdown: string, sourceUrl: s
   }
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'pricehawk',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `Source URL: ${sourceUrl}\n\nMarkown Content:\n${markdown.slice(0, 15000)}` }, // Truncate to avoid context limits if huge
-        ],
-        temperature: 0.1,
-        response_format: { type: 'json_object' },
-      }),
+    // Use weighted round-robin router for model selection
+    const response = await routedCompletion({
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Source URL: ${sourceUrl}\n\nMarkdown Content:\n${markdown.slice(0, 15000)}` },
+      ],
+      temperature: 0.1,
+      responseFormat: { type: 'json_object' },
+      // No unicorn context for extraction - use standard tier
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Extractor API Error: ${response.status} - ${errorText}`);
-        return [];
-    }
+    console.log(`Extraction completed using model: ${response.model}`);
 
-    const data: OpenRouterResponse = await response.json();
-    
-    if (data.error) {
-      console.error('Extractor OpenRouter Error:', data.error.message);
-      return [];
-    }
-
-    const content = data.choices[0]?.message?.content;
+    const content = response.content;
     if (!content) return [];
 
     const parsed = JSON.parse(content);
