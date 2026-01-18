@@ -1,11 +1,7 @@
 import { PricingAnomaly, ValidatedGlitch, ValidationResult } from '@/types';
 import { publishConfirmedGlitch } from '@/lib/clients/redis';
 import { isJinaEnabled, scoreGlitch } from '@/lib/ai/jina';
-
-// OpenRouter API configuration
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = 'deepseek/deepseek-chat'; // DeepSeek V3
+import { routedCompletion, UnicornContext } from './openrouter-router';
 
 // System prompt for glitch analysis
 const SYSTEM_PROMPT = `You are an AI expert in e-commerce pricing analysis. Your job is to determine if a price is a genuine pricing error (glitch) or a legitimate sale/discount.
@@ -36,70 +32,55 @@ Respond ONLY with valid JSON in this exact format:
   "glitch_type": "decimal_error" | "database_error" | "clearance" | "coupon_stack" | "unknown"
 }`;
 
-interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-  error?: {
-    message: string;
+/**
+ * Build unicorn context from anomaly for model routing decisions
+ */
+function buildUnicornContext(anomaly: PricingAnomaly): UnicornContext {
+  const product = anomaly.product;
+  return {
+    discountPercentage: anomaly.discountPercentage,
+    zScore: anomaly.zScore ?? undefined,
+    productPrice: product?.price ?? 0,
+    originalPrice: product?.originalPrice ?? undefined,
+    initialConfidence: anomaly.initialConfidence,
+    anomalyType: anomaly.anomalyType,
   };
 }
 
 /**
- * Validate a pricing anomaly using AI (OpenRouter/DeepSeek)
+ * Validate a pricing anomaly using AI with weighted model routing
+ * Unicorn opportunities (high-value glitches) get routed to SOTA models
  */
 export async function validateAnomaly(anomaly: PricingAnomaly): Promise<ValidationResult> {
-  if (!OPENROUTER_API_KEY) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
     console.warn('OpenRouter API key not configured');
-    // Return a conservative estimate based on rule-based logic
     return fallbackValidation(anomaly);
   }
 
   const userPrompt = formatAnomalyForAI(anomaly);
+  const unicornContext = buildUnicornContext(anomaly);
 
   try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-        'X-Title': 'pricehawk',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.1, // Low temperature for consistent analysis
-        max_tokens: 500,
-        response_format: { type: 'json_object' },
-      }),
+    // Use weighted round-robin router with unicorn escalation
+    const response = await routedCompletion({
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.1,
+      maxTokens: 500,
+      responseFormat: { type: 'json_object' },
+      unicornContext, // Pass context for SOTA model routing on high-value opportunities
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      console.error('OpenRouter API error:', error);
-      return fallbackValidation(anomaly);
-    }
-
-    const data: OpenRouterResponse = await response.json();
-    
-    if (data.error) {
-      console.error('OpenRouter error:', data.error.message);
-      return fallbackValidation(anomaly);
-    }
-
-    const content = data.choices[0]?.message?.content;
-    if (!content) {
-      return fallbackValidation(anomaly);
-    }
+    console.log(
+      `Validation completed using model: ${response.model}` +
+        (response.isUnicorn ? ' (SOTA - unicorn opportunity detected)' : '')
+    );
 
     // Parse AI response
-    const parsed = JSON.parse(content);
+    const parsed = JSON.parse(response.content);
     return {
       is_glitch: parsed.is_glitch ?? false,
       confidence: Math.min(Math.max(parsed.confidence ?? 0, 0), 100),
